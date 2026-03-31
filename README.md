@@ -19,4 +19,3 @@ Objectif : simplifier et digitaliser la gestion automobile.
 - Technologies
 - Contribution
 - Licence
-
