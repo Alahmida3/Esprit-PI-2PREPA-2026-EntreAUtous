@@ -12,7 +12,7 @@ Elle permet de :
 Objectif : simplifier et digitaliser la gestion automobile.
 
 
-## 📑 Table des Matières
+##  Table des Matières
 - Installation
 - Utilisation
 - Fonctionnalités
