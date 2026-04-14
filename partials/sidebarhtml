@@ -1,0 +1,49 @@
+<div class="dash-nav dash-nav-dark">
+    <header>
+        <a href="#!" class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </a>
+
+        <a href="/web/views/back/client.php" class="spur-logo">
+            <i class="fas fa-box"></i> <span>Modules</span>
+        </a>
+    </header>
+
+    <nav class="dash-nav-list">
+
+        <a href="/web/views/back/client.php" class="dash-nav-item">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+
+        <a href="#" class="dash-nav-item">
+            <i class="fas fa-users"></i> Clients
+        </a>
+
+        <a href="#" class="dash-nav-item">
+            <i class="fas fa-shopping-cart"></i> Produits
+        </a>
+
+        <a href="#" class="dash-nav-item">
+            <i class="fas fa-box"></i> Commandes
+        </a>
+
+        <a href="#" class="dash-nav-item">
+            <i class="fas fa-truck"></i> Livraison
+        </a>
+
+        <a href="#" class="dash-nav-item">
+            <i class="fas fa-chart-line"></i> Statistiques
+        </a>
+
+        <a href="#" class="dash-nav-item">
+            <i class="fas fa-cog"></i> Paramètres
+        </a>
+
+        <hr class="border-secondary mx-3">
+
+        <a href="/web/controller/logout.php" class="dash-nav-item text-danger">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+
+    </nav>
+</div>
