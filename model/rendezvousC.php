@@ -8,8 +8,9 @@ if (!class_exists('RendezVous')) {
         private $statutRDV;
         private $idVehicule;
         private $idclientRDV;
+        private $descriptionRDV; 
 
-        public function __construct($idRDV, $dateRDV, $heureRDV, $type_serviceRDV, $statutRDV, $idVehicule, $idclientRDV) {
+        public function __construct($idRDV, $dateRDV, $heureRDV, $type_serviceRDV, $statutRDV, $idVehicule, $idclientRDV , $descriptionRDV) {
             $this->idRDV = $idRDV;
             $this->dateRDV = $dateRDV;
             $this->heureRDV = $heureRDV;
@@ -17,6 +18,7 @@ if (!class_exists('RendezVous')) {
             $this->statutRDV = $statutRDV;
             $this->idVehicule = $idVehicule;
             $this->idclientRDV = $idclientRDV;
+            $this->descriptionRDV = $descriptionRDV;
         }
 
         // Getters
@@ -27,6 +29,7 @@ if (!class_exists('RendezVous')) {
         public function getStatutRDV() { return $this->statutRDV; }
         public function getIdVehicule() { return $this->idVehicule; }
         public function getIdClientRDV() { return $this->idclientRDV; }
+        public function getDescriptionRDV() { return $this->descriptionRDV; }
     }
 }
 ?>

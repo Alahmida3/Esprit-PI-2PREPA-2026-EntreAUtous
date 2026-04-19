@@ -2,9 +2,57 @@
 require_once(__DIR__ . '/../config.php');
 
 class RendezVousC {
+    public function ajouter($rdv) {
+        $sql = "INSERT INTO rendezvous (dateRDV, heureRDV, type_serviceRDV, statutRDV, idVehicule, idclientRDV, descriptionRDV) 
+                VALUES (:date, :heure, :typeService, :statut, :idVehicule, :idClient, :description)";
+        $db = config::getConnexion();
+        try {
+            $query = $db->prepare($sql);
+            $query->execute([
+                'date'        => $rdv->getDateRDV(),
+                'heure'       => $rdv->getHeureRDV(),
+                'typeService' => $rdv->getTypeServiceRDV(),
+                'statut'      => $rdv->getStatutRDV(),
+                'idVehicule'  => $rdv->getIdVehicule(),
+                'idClient'    => $rdv->getIdClientRDV(),
+                'description' => $rdv->getDescriptionRDV()
+            ]);
+        } catch (Exception $e) {
+            die('Erreur: ' . $e->getMessage());
+        }
+    }    
+
+    public function modifier($id, $date, $heure, $typeService, $statut, $idVehicule, $idClient, $description) {
+        $sql = "UPDATE rendezvous SET 
+                    dateRDV = :date,
+                    heureRDV = :heure,
+                    type_serviceRDV = :typeService,
+                    statutRDV = :statut,
+                    idVehicule = :idVehicule,
+                    idclientRDV = :idClient,
+                    descriptionRDV = :description
+                WHERE idRDV = :id";
+        $db = config::getConnexion();
+        try {
+            $query = $db->prepare($sql);
+            $query->execute([
+                'id'          => $id,
+                'date'        => $date,
+                'heure'       => $heure,
+                'typeService' => $typeService,
+                'statut'      => $statut,
+                'idVehicule'  => $idVehicule,
+                'idClient'    => $idClient,
+                'description' => $description
+            ]);
+            return true;
+        } catch (Exception $e) {
+            die('Erreur modification: ' . $e->getMessage());
+        }
+    }
 
     /**
-     * Récupérer tous les rendez-vous de la base de données
+     * Récupérer tous les rendez-vous
      */
     public function getAll() {
         $sql = "SELECT * FROM rendezvous ORDER BY idRDV DESC";
@@ -17,7 +65,7 @@ class RendezVousC {
     }
 
     /**
-     * Récupérer un rendez-vous spécifique par son ID (pour la recherche)
+     * Récupérer un rendez-vous par ID
      */
     public function getRdvById($id) {
         $sql = "SELECT * FROM rendezvous WHERE idRDV = :id";
@@ -46,14 +94,10 @@ class RendezVousC {
     }
 
     /**
-     * Affiche une ligne de tableau (tr) avec les données du rendez-vous
-     * Aligné sur 8 colonnes : ID, Date, Heure, Service, Statut, Véhicule, Client, Action
+     * Afficher une ligne du tableau
      */
     public function afficher($rdv) {
-        // On s'assure que $rdv est un tableau
         $r = (array)$rdv;
-        
-        // Nettoyage du texte du statut
         $statut = ucfirst(strtolower($r['statutRDV'] ?? 'en attente'));
 
         echo '
@@ -67,11 +111,16 @@ class RendezVousC {
             <td>' . $statut . '</td>
             <td><span class="text-white">VEH-' . htmlspecialchars($r['idVehicule']) . '</span></td>
             <td>' . htmlspecialchars($r['idclientRDV']) . '</td>
+            <td>' . htmlspecialchars($r['descriptionRDV'] ?? 'Aucune description') . '</td>
             <td class="text-end pe-4">
-                <a href="?delete_id=' . $r['idRDV'] . '" 
-                   class="btn btn-sm btn-outline-danger" 
+                <a href="modifierRDV.php?id=' . $r['idRDV'] . '"
+                   class="btn btn-sm btn-outline-warning me-2">
+                    Modifier
+                </a>
+                <a href="?delete_id=' . $r['idRDV'] . '"
+                   class="btn btn-sm btn-outline-danger"
                    onclick="return confirm(\'Voulez-vous vraiment supprimer le rendez-vous #' . $r['idRDV'] . ' ?\')">
-                    Supprimer rendez vous
+                    Supprimer
                 </a>
             </td>
         </tr>';

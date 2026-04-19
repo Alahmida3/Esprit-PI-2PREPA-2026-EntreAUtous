@@ -1,7 +1,6 @@
 <?php
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/../../controller/Vehicule.php');
-
 $message     = '';
 $messageType = '';
 
@@ -47,6 +46,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         );
 
         $vehiculeC->modifierVehicule($vehicule, $id);
+
+        // ===== MODIFIER LE RDV SI FOURNI =====
+        if (!empty($_POST['rdv_id']) && !empty($_POST['rdv_date']) && !empty($_POST['rdv_heure'])) {
+            $pdo  = config::getConnexion();
+            $stmt = $pdo->prepare("UPDATE rendezvous SET dateRDV = :date, heureRDV = :heure WHERE idRDV = :id");
+            $stmt->execute([
+                'date'  => $_POST['rdv_date'],
+                'heure' => $_POST['rdv_heure'],
+                'id'    => (int)$_POST['rdv_id']
+            ]);
+        }
+
         $message     = "✅ Véhicule modifié avec succès !";
         $messageType = "success";
 
@@ -96,12 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         $vehiculeC = new VoitureC();
         $vehiculeC->ajouterVehicule($vehicule);
-        
-        // Vérifier si c'est une requête AJAX
+
         $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-        
         if ($isAjax) {
-            // Retourner une réponse JSON pour AJAX
             header('Content-Type: application/json');
             echo json_encode(['success' => true, 'message' => '✅ Véhicule ajouté avec succès !']);
             exit;
@@ -111,11 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
     } catch (Exception $e) {
-        // Vérifier si c'est une requête AJAX
         $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-        
         if ($isAjax) {
-            // Retourner une réponse JSON pour AJAX
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => '❌ Erreur : ' . $e->getMessage()]);
             exit;
@@ -150,9 +155,8 @@ try {
 
 // ===== RÉCUPÉRER LES MARQUES UNIQUES POUR LE FILTRE =====
 $vehiculeC = new VoitureC();
-$marques = $vehiculeC->getMarquesUniques();
+$marques   = $vehiculeC->getMarquesUniques();
 
-// ===== TRAITEMENT DU FILTRE (UNIQUEMENT PAR MARQUE) =====
 // ===== TRAITEMENT DU FILTRE PAR CLIENT =====
 $filtreActif  = false;
 $filtreType   = '';
@@ -163,7 +167,6 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
     $vehicules      = $vehiculeC->filtrerVehiculeParClient($idClientFiltre);
     $filtreActif    = true;
     $filtreType     = 'client';
-    // Trouver le nom du client sélectionné
     foreach ($clients as $c) {
         if ($c['id_client'] == $idClientFiltre) {
             $filtreValeur = $c['nomclient'];
@@ -172,6 +175,26 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
     }
 } else {
     $vehicules = $vehiculeC->afficherVehicule();
+}
+
+// ===== RÉCUPÉRER LE DERNIER RDV PAR VÉHICULE =====
+$rdvParVehicule = [];
+try {
+    $pdo  = config::getConnexion();
+    $stmt = $pdo->query("
+        SELECT r.idRDV, r.idVehicule, r.dateRDV, r.heureRDV 
+        FROM rendezvous r
+        INNER JOIN (
+            SELECT idVehicule, MAX(idRDV) as maxId 
+            FROM rendezvous 
+            GROUP BY idVehicule
+        ) latest ON r.idRDV = latest.maxId
+    ");
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $rdv) {
+        $rdvParVehicule[$rdv['idVehicule']] = $rdv;
+    }
+} catch (Exception $e) {
+    $rdvParVehicule = [];
 }
 ?>
 <!DOCTYPE html>
@@ -218,7 +241,7 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     <?php endif; ?>
-    
+
     <section class="page-section bg-light" id="portfolio" style="margin-top:80px; padding:40px 0;">
         <div class="container">
             <div class="text-center mb-2">
@@ -226,39 +249,32 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
                 <p class="text-muted fst-italic">Aperçu de vos véhicules actuels.</p>
             </div>
 
-            <!-- ===== RECHERCHE ET AJOUT SUR LA MÊME LIGNE ===== -->
             <!-- ===== RECHERCHE ET AJOUT ===== -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <form action="" method="POST" class="d-flex gap-2">
-        <select name="filtre_client" class="form-select" style="width: 250px;">
-            <option value="">-- Tous les clients --</option>
-            <?php foreach ($clients as $c): ?>
-                <option value="<?php echo (int)$c['id_client']; ?>"
-                    <?php echo (isset($_POST['search_client']) && $_POST['filtre_client'] == $c['id_client']) ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($c['nomclient']); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-        <button type="submit" name="search_client" class="btn btn-primary">
-            <i class="fas fa-search"></i> Rechercher
-        </button>
-    </form>
-    <button class="btn btn-warning btn-sm" onclick="openAjoutModal()">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <form action="" method="POST" class="d-flex gap-2">
+                    <select name="filtre_client" class="form-select" style="width: 250px;">
+                        <option value="">-- Tous les clients --</option>
+                        <?php foreach ($clients as $c): ?>
+                            <option value="<?php echo (int)$c['id_client']; ?>"
+                                <?php echo (isset($_POST['search_client']) && $_POST['filtre_client'] == $c['id_client']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($c['nomclient']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" name="search_client" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+                </form>
+                <button class="btn btn-warning btn-sm" onclick="openAjoutModal()">
                     <i class="fas fa-plus"></i> Ajouter un véhicule
                 </button>
-
-    
-</div>
-                
-                <!-- Bouton Ajouter à droite - Appelle formulaireVehicule.php -->
-                
             </div>
 
             <!-- Message de filtre actif -->
-            <?php if ($filtreActif && $filtreType =='client'): ?>
+            <?php if ($filtreActif && $filtreType == 'client'): ?>
             <div class="alert alert-info mb-4 py-2">
                 <i class="fas fa-filter"></i> Affichage des véhicules du client <strong><?php echo htmlspecialchars($filtreValeur); ?></strong>
-                <a href="GestionVehicule.php" class="alert-link ms-2"> Réinitialiser</a>
+                <a href="GestionVehicule.php" class="alert-link ms-2">Réinitialiser</a>
             </div>
             <?php endif; ?>
 
@@ -285,10 +301,32 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
                                 <p class="mb-3">
                                     <strong>Kilométrage :</strong> <?php echo number_format($vehicule['kilometrageV'] ?? 0, 0, ',', ' '); ?> km
                                 </p>
+
+                                <?php if (isset($rdvParVehicule[$vehicule['idVehicule']])): ?>
+                                    <?php $rdv = $rdvParVehicule[$vehicule['idVehicule']]; ?>
+                                    <div class="alert alert-warning py-1 px-2 mb-2" style="font-size:0.85rem;">
+                                        📅 <strong>Prochain RDV :</strong>
+                                        <?= htmlspecialchars($rdv['dateRDV']) ?>
+                                        à <?= htmlspecialchars(substr($rdv['heureRDV'], 0, 5)) ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="alert alert-secondary py-1 px-2 mb-2" style="font-size:0.85rem;">
+                                        📅 <strong>Aucun RDV planifié</strong>
+                                    </div>
+                                <?php endif; ?>
+
                                 <div class="d-flex justify-content-center gap-2">
                                     <button class="btn btn-warning btn-sm"
                                             data-bs-toggle="modal" data-bs-target="#modalModifierVehicule"
-                                            onclick="editVehicule(<?php echo htmlspecialchars(json_encode($vehicule)); ?>)">
+                                            onclick="editVehicule(<?php
+                                                $v = $vehicule;
+                                                if (isset($rdvParVehicule[$vehicule['idVehicule']])) {
+                                                    $v['rdv_id']    = $rdvParVehicule[$vehicule['idVehicule']]['idRDV'];
+                                                    $v['rdv_date']  = $rdvParVehicule[$vehicule['idVehicule']]['dateRDV'];
+                                                    $v['rdv_heure'] = $rdvParVehicule[$vehicule['idVehicule']]['heureRDV'];
+                                                }
+                                                echo htmlspecialchars(json_encode($v));
+                                            ?>)">
                                         <i class="fas fa-edit"></i> Modifier
                                     </button>
                                     <button type="button" class="btn btn-primary btn-sm" onclick="openRDVModal(<?php echo $vehicule['idVehicule']; ?>)">
@@ -307,7 +345,7 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
                 <?php else: ?>
                     <div class="col-12 text-center">
                         <p class="text-muted">
-                            <?php echo $filtreActif ? 'Aucun véhicule trouvé pour cette marque.' : 'Aucun véhicule trouvé.'; ?>
+                            <?php echo $filtreActif ? 'Aucun véhicule trouvé pour ce client.' : 'Aucun véhicule trouvé.'; ?>
                         </p>
                     </div>
                 <?php endif; ?>
@@ -315,19 +353,18 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
         </div>
     </section>
 
-    <!-- ===== MODAL AJOUT (chargé dynamiquement depuis formulaireVehicule.php) ===== -->
+    <!-- ===== MODAL AJOUT ===== -->
     <div class="modal fade" id="modalVehicule" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header-custom">
-                <h2 class="modal-title-custom">Ajouter un Véhicule</h2>
-                <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"></button>
-            </div>
-            <div id="modalContentAjout">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header-custom">
+                    <h2 class="modal-title-custom">Ajouter un Véhicule</h2>
+                    <button type="button" class="btn-close position-absolute end-0 top-0 m-3" data-bs-dismiss="modal"></button>
                 </div>
+                <div id="modalContentAjout"></div>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- ===== MODAL MODIFICATION ===== -->
     <div class="modal fade" id="modalModifierVehicule" tabindex="-1" aria-hidden="true">
@@ -374,6 +411,20 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
                             <input type="file" name="imageVoiture" class="form-control" accept="image/*">
                             <small class="text-muted">Laissez vide pour garder l'image actuelle.</small>
                         </div>
+
+                        <!-- ===== CHAMPS RDV ===== -->
+                        <hr>
+                        <h6 class="fw-bold text-warning mb-3">📅 Rendez-vous</h6>
+                        <input type="hidden" name="rdv_id" id="edit_rdv_id">
+                        <div class="mb-3">
+                            <label class="form-label">Date du RDV</label>
+                            <input type="date" name="rdv_date" id="edit_rdv_date" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Heure du RDV</label>
+                            <input type="time" name="rdv_heure" id="edit_rdv_heure" class="form-control">
+                        </div>
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                             <button type="submit" class="btn btn-warning">Enregistrer</button>
@@ -407,6 +458,7 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="../assets/Front office/js/scripts.js"></script>
     <script>
+        // ===== FONCTION EDIT VEHICULE (une seule version) =====
         function editVehicule(vehicule) {
             document.getElementById('edit_idVehicule').value      = vehicule.idVehicule;
             document.getElementById('edit_marque').value          = vehicule.marqueV;
@@ -422,6 +474,11 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
                     break;
                 }
             }
+
+            // Champs RDV
+            document.getElementById('edit_rdv_id').value    = vehicule.rdv_id    || '';
+            document.getElementById('edit_rdv_date').value  = vehicule.rdv_date  || '';
+            document.getElementById('edit_rdv_heure').value = vehicule.rdv_heure || '';
         }
 
         document.getElementById('edit_idClient').addEventListener('change', function () {
@@ -431,13 +488,12 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
         setTimeout(function () {
             document.querySelectorAll('.alert-fixed').forEach(a => a.classList.remove('show'));
         }, 4000);
-        
-        function openRDVModal(idVehicule) {
-            const modalEl      = document.getElementById('modalRDV');
-            const contentEl    = document.getElementById('modalContentRDV');
-            const myModal      = new bootstrap.Modal(modalEl);
 
-            // Afficher le spinner pendant le chargement
+        function openRDVModal(idVehicule) {
+            const modalEl   = document.getElementById('modalRDV');
+            const contentEl = document.getElementById('modalContentRDV');
+            const myModal   = new bootstrap.Modal(modalEl);
+
             contentEl.innerHTML = `
                 <div class="text-center p-4">
                     <div class="spinner-border text-primary" role="status"></div>
@@ -446,7 +502,6 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
 
             myModal.show();
 
-            // Charger formulaireRDV.php dans le modal
             fetch('formulaireRDV.php?id=' + idVehicule, {
                 method: 'GET',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -457,8 +512,6 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
             })
             .then(html => {
                 contentEl.innerHTML = html;
-
-                // Exécuter les scripts injectés par formulaireRDV.php
                 contentEl.querySelectorAll('script').forEach(oldScript => {
                     const newScript = document.createElement('script');
                     newScript.textContent = oldScript.textContent;
@@ -474,13 +527,12 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
                     </div>`;
             });
         }
-        
-        function openAjoutModal() {
-            const modalEl      = document.getElementById('modalVehicule');
-            const contentEl    = document.getElementById('modalContentAjout');
-            const myModal      = new bootstrap.Modal(modalEl);
 
-            // Afficher le spinner pendant le chargement
+        function openAjoutModal() {
+            const modalEl   = document.getElementById('modalVehicule');
+            const contentEl = document.getElementById('modalContentAjout');
+            const myModal   = new bootstrap.Modal(modalEl);
+
             contentEl.innerHTML = `
                 <div class="text-center p-4">
                     <div class="spinner-border text-warning" role="status"></div>
@@ -489,7 +541,6 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
 
             myModal.show();
 
-            // Charger formulaireVehicule.php dans le modal
             fetch('formulaireVehicule.php', {
                 method: 'GET',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -500,8 +551,6 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
             })
             .then(html => {
                 contentEl.innerHTML = html;
-
-                // Exécuter les scripts injectés par formulaireVehicule.php
                 contentEl.querySelectorAll('script').forEach(oldScript => {
                     const newScript = document.createElement('script');
                     newScript.textContent = oldScript.textContent;
