@@ -13,6 +13,7 @@
 
   $error = '';
   $entretien = null;
+  $validationErrors = [];
   
   if (!$pdo) {
       $error = "Erreur de connexion à la base de données. Vérifiez config.php.";
@@ -43,11 +44,12 @@
                   $_POST['km_prochain'] ?? ''
               );
 
-              if ($controller->updateEntretien($entretienObj)) {
+              $result = $controller->updateEntretien($entretienObj);
+              if ($result['success']) {
                   header('Location: listeentretiens.php?updated=1');
                   exit;
               } else {
-                  $error = "Erreur lors de la modification.";
+                  $validationErrors = $result['errors'] ?? ['Erreur lors de la modification.'];
               }
           } catch (Exception $e) {
               $error = "Erreur : " . $e->getMessage();
@@ -90,6 +92,16 @@
         </div>
 
         <?php if ($error) echo '<div class="alert alert-danger">' . htmlspecialchars($error) . '</div>'; ?>
+        <?php if (!empty($validationErrors)): ?>
+            <div class="alert alert-danger">
+                <strong>Erreurs de validation :</strong>
+                <ul class="mb-0 mt-2">
+                    <?php foreach ($validationErrors as $validationError): ?>
+                        <li><?php echo htmlspecialchars($validationError); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
 
         <!-- Contenu principal -->
         <div class="row g-6">
@@ -135,7 +147,7 @@
     <label for="id_voiture" class="form-label fw-medium">
       ID Voiture <span class="text-danger">*</span>
     </label>
-    <input type="text" class="form-control" id="id_voiture" name="id_voiture" value="<?php echo htmlspecialchars($entretien['id_voiture']); ?>">
+    <input type="text" class="form-control" id="id_voiture" name="id_voiture" value="<?php echo htmlspecialchars($entretien['id_voiture']); ?>" placeholder="Ex: 1" inputmode="numeric">
   </div>
 
   <!-- Date entretien -->
@@ -151,7 +163,7 @@
     <label for="kilometrage" class="form-label fw-medium">
       Kilométrage <span class="text-danger">*</span>
     </label>
-    <input type="text" class="form-control" id="kilometrage" name="kilometrage" value="<?php echo htmlspecialchars($entretien['kilometrage']); ?>">
+    <input type="text" class="form-control" id="kilometrage" name="kilometrage" value="<?php echo htmlspecialchars($entretien['kilometrage']); ?>" placeholder="Ex: 120000" inputmode="numeric">
   </div>
 
   <!-- Type intervention -->
@@ -197,7 +209,8 @@
     <label for="km_prochain" class="form-label fw-medium">
       Kilométrage prochaine visite
     </label>
-    <input type="text" class="form-control" id="km_prochain" name="km_prochain" value="<?php echo htmlspecialchars($entretien['km_prochain'] ?? ''); ?>">
+    <input type="text" class="form-control" id="km_prochain" name="km_prochain" value="<?php echo htmlspecialchars($entretien['km_prochain'] ?? ''); ?>" placeholder="Ex: 150000" inputmode="numeric">
+  </div>
   </div>
  
                   <!-- Boutons -->
@@ -384,9 +397,12 @@
         }
     });
 
-    // Validation en temps réel
+    // Validation en temps réel - Empêcher les mauvais types
     document.getElementById('id_voiture').addEventListener('input', function() {
         const value = this.value.trim();
+        // Accepter uniquement les chiffres
+        this.value = value.replace(/[^0-9]/g, '');
+        
         if (!value || isNaN(value) || value <= 0) {
             this.style.borderColor = 'red';
         } else {
@@ -394,8 +410,21 @@
         }
     });
 
+    document.getElementById('date_entretien').addEventListener('input', function() {
+        const value = this.value.trim();
+        // Format YYYY-MM-DD
+        if (value.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            this.style.borderColor = '';
+        } else if (value.length > 0) {
+            this.style.borderColor = 'red';
+        }
+    });
+
     document.getElementById('kilometrage').addEventListener('input', function() {
         const value = this.value.trim();
+        // Accepter uniquement les chiffres
+        this.value = value.replace(/[^0-9]/g, '');
+        
         if (!value || isNaN(value) || value < 0) {
             this.style.borderColor = 'red';
         } else {
@@ -405,10 +434,23 @@
 
     document.getElementById('km_prochain').addEventListener('input', function() {
         const value = this.value.trim();
+        // Accepter uniquement les chiffres
+        this.value = value.replace(/[^0-9]/g, '');
+        
         if (value && (isNaN(value) || value < 0)) {
             this.style.borderColor = 'red';
         } else {
             this.style.borderColor = '';
+        }
+    });
+
+    document.getElementById('prochaine_echeance').addEventListener('input', function() {
+        const value = this.value.trim();
+        // Format YYYY-MM-DD
+        if (value.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            this.style.borderColor = '';
+        } else if (value.length > 0) {
+            this.style.borderColor = 'red';
         }
     });
   </script>

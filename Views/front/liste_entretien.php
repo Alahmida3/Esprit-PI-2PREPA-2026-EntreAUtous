@@ -59,66 +59,61 @@
 
         <section class="page-section bg-light" id="portfolio">
             <div class="container">
+                    <?php
+                    // View front: récupère les entretiens via le controller (MVC)
+                    require_once '../../config.php';
+                    require_once '../../controller/EntretienController.php';
+                    require_once '../../Models/Entretien.php';
+
+                    $list = [];
+                    if (isset($pdo) && $pdo) {
+                        $controller = new EntretienController($pdo);
+                        $list = $controller->listEntretiens();
+                    }
+                    ?>
                 <div class="text-center mt-5">
                     <h2 class="section-heading text-uppercase">Mon Carnet d'Entretien</h2>
                     <h3 class="section-subheading text-muted">Historique des interventions sur votre véhicule.</h3>
                 </div>
                 <div class="row">
-                    
-                    <div class="col-lg-4 col-sm-6 mb-4">
-                        <div class="maintenance-card card shadow-sm">
-                            <div class="icon-header text-center text-primary">
-                                <i class="fas fa-oil-can fa-4x"></i>
-                            </div>
-                            <div class="card-body p-4 text-center">
-                                <h4 class="fw-bold">Vidange Moteur</h4>
-                                <p class="text-muted mb-1"><i class="fas fa-calendar-alt me-2"></i>15 Mars 2026</p>
-                                <p class="text-muted mb-3"><i class="fas fa-tachometer-alt me-2"></i>95,100 km</p>
-                                <hr>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="price-badge">120.000 TND</span>
-                                    <a href="#" class="btn btn-primary btn-sm rounded-pill px-3 text-uppercase fw-bold">Détails</a>
+                    <?php if (!empty($list)) {
+                        foreach ($list as $row) { ?>
+                            <div class="col-lg-4 col-sm-6 mb-4">
+                                <div class="maintenance-card card shadow-sm">
+                                    <div class="icon-header text-center text-primary">
+                                        <i class="fas fa-tools fa-4x"></i>
+                                    </div>
+                                    <div class="card-body p-4 text-center">
+                                        <h4 class="fw-bold"><?php echo htmlspecialchars($row['type_intervention']); ?></h4>
+                                        <p class="text-muted mb-1"><i class="fas fa-calendar-alt me-2"></i><?php echo htmlspecialchars($row['date_entretien']); ?></p>
+                                        <p class="text-muted mb-3"><i class="fas fa-tachometer-alt me-2"></i><?php echo number_format((float)$row['kilometrage'],0,',','.'); ?> km</p>
+                                        <hr>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="price-badge"><?php echo htmlspecialchars($row['statut']); ?></span>
+                                            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 text-uppercase fw-bold btn-details"
+                                                data-id="<?php echo htmlspecialchars($row['id_entretien']); ?>"
+                                                data-voiture="<?php echo htmlspecialchars($row['id_voiture']); ?>"
+                                                data-type="<?php echo htmlspecialchars($row['type_intervention']); ?>"
+                                                data-date="<?php echo htmlspecialchars($row['date_entretien']); ?>"
+                                                data-km="<?php echo htmlspecialchars($row['kilometrage']); ?>"
+                                                data-statut="<?php echo htmlspecialchars($row['statut']); ?>"
+                                                data-prochaine="<?php echo htmlspecialchars($row['prochaine_echeance']); ?>"
+                                                data-kmprochain="<?php echo htmlspecialchars($row['km_prochain']); ?>"
+                                                data-obs="<?php echo htmlspecialchars($row['observations']); ?>"
+                                            >Détails</button>
+                                            <!-- bouton facture -->
+        <a href="liste_factures.php?entretien=<?php echo $row['id_entretien']; ?>" 
+           class="btn btn-warning btn-sm rounded-pill px-3">
+            <i class="fas fa-file-invoice"></i> Facture
+        </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-sm-6 mb-4">
-                        <div class="maintenance-card card shadow-sm">
-                            <div class="icon-header text-center text-success">
-                                <i class="fas fa-tools fa-4x"></i>
-                            </div>
-                            <div class="card-body p-4 text-center">
-                                <h4 class="fw-bold">Freins & Disques</h4>
-                                <p class="text-muted mb-1"><i class="fas fa-calendar-alt me-2"></i>02 Février 2026</p>
-                                <p class="text-muted mb-3"><i class="fas fa-tachometer-alt me-2"></i>92,000 km</p>
-                                <hr>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="price-badge">315.000 TND</span>
-                                    <a href="#" class="btn btn-primary btn-sm rounded-pill px-3 text-uppercase fw-bold">Détails</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-sm-6 mb-4">
-                        <div class="maintenance-card card shadow-sm">
-                            <div class="icon-header text-center text-warning">
-                                <i class="fas fa-car-side fa-4x"></i>
-                            </div>
-                            <div class="card-body p-4 text-center">
-                                <h4 class="fw-bold">Révision Générale</h4>
-                                <p class="text-muted mb-1"><i class="fas fa-calendar-alt me-2"></i>10 Janvier 2026</p>
-                                <p class="text-muted mb-3"><i class="fas fa-tachometer-alt me-2"></i>90,500 km</p>
-                                <hr>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="price-badge">450.000 TND</span>
-                                    <a href="#" class="btn btn-primary btn-sm rounded-pill px-3 text-uppercase fw-bold">Détails</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                        <?php }
+                    } else { ?>
+                        <div class="col-12"><p class="text-muted">Aucun entretien trouvé.</p></div>
+                    <?php } ?>
                 </div>
             </div>
         </section>
@@ -131,7 +126,55 @@
             </div>
         </footer>
 
+        <!-- Modal Détails Entretien -->
+        <div class="modal fade" id="modalDetailsEntretien" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Détails de l'entretien</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>Type :</strong> <span id="md-type"></span></li>
+                            <li><strong>Date :</strong> <span id="md-date"></span></li>
+                            <li><strong>Kilométrage :</strong> <span id="md-km"></span></li>
+                            <li><strong>Statut :</strong> <span id="md-statut"></span></li>
+                            <li><strong>Prochaine échéance :</strong> <span id="md-prochaine"></span></li>
+                            <li><strong>KM prochain :</strong> <span id="md-kmprochain"></span></li>
+                            <li><strong>ID Voiture :</strong> <span id="md-voiture"></span></li>
+                            <li><strong>Observations :</strong> <div id="md-obs" class="text-muted"></div></li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="../../assets/front/js/scripts.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var modalEl = document.getElementById('modalDetailsEntretien');
+                var modal = new bootstrap.Modal(modalEl);
+
+                document.querySelectorAll('.btn-details').forEach(function(btn){
+                    btn.addEventListener('click', function(e){
+                        var dataset = e.currentTarget.dataset;
+                        document.getElementById('md-type').textContent = dataset.type || '';
+                        document.getElementById('md-date').textContent = dataset.date || '';
+                        document.getElementById('md-km').textContent = dataset.km ? Number(dataset.km).toLocaleString('fr-FR') + ' km' : '';
+                        document.getElementById('md-statut').textContent = dataset.statut || '';
+                        document.getElementById('md-prochaine').textContent = dataset.prochaine || '';
+                        document.getElementById('md-kmprochain').textContent = dataset.kmprochain || '';
+                        document.getElementById('md-voiture').textContent = dataset.voiture || '';
+                        document.getElementById('md-obs').textContent = dataset.obs || '—';
+                        modal.show();
+                    });
+                });
+            });
+        </script>
     </body>
 </html>

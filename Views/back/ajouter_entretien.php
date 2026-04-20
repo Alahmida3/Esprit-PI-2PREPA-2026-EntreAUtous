@@ -12,6 +12,7 @@
   require_once '../../Models/Entretien.php';
 
   $error = '';
+  $validationErrors = [];
   
   if (!$pdo) {
       $error = "Erreur de connexion à la base de données. Vérifiez config.php.";
@@ -20,8 +21,8 @@
 
       if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_add'])) {
           try {
-              $entretien = new Entretien(
-                  $_POST['id_entretien'] ?? null,
+                $entretien = new Entretien(
+                  null,
                   $_POST['id_voiture'],
                   $_POST['date_entretien'],
                   $_POST['kilometrage'],
@@ -32,11 +33,12 @@
                   $_POST['km_prochain'] ?? ''
               );
 
-              if ($controller->addEntretien($entretien)) {
+              $result = $controller->addEntretien($entretien);
+              if ($result['success']) {
                   header('Location: listeentretiens.php?success=1');
                   exit;
               } else {
-                  $error = "Erreur lors de l'ajout.";
+                  $validationErrors = $result['errors'] ?? ['Erreur lors de l\'ajout.'];
               }
           } catch (Exception $e) {
               $error = "Erreur : " . $e->getMessage();
@@ -79,6 +81,16 @@
         </div>
 
         <?php if ($error) echo '<div class="alert alert-danger">' . htmlspecialchars($error) . '</div>'; ?>
+        <?php if (!empty($validationErrors)): ?>
+            <div class="alert alert-danger">
+                <strong>Erreurs de validation :</strong>
+                <ul class="mb-0 mt-2">
+                    <?php foreach ($validationErrors as $validationError): ?>
+                        <li><?php echo htmlspecialchars($validationError); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
 
         <!-- Contenu principal -->
         <div class="row g-6">
@@ -109,21 +121,16 @@
                   </div>
                 </div>
  
-                <form action="#" method="POST">
+                <form action="#" method="POST" id="entretienForm">
                     
-  <div class="mb-5">
-    <label for="id_entretien" class="form-label fw-medium">
-      ID  <span class="text-danger">*</span>
-    </label>
-    <input type="text" class="form-control" id="id_entretien" name="id_entretien">
-  </div>
+  <!-- `id_entretien` supprimé du formulaire : géré par la base (AUTO_INCREMENT) -->
 
   <!-- ID voiture -->
   <div class="mb-5">
     <label for="id_voiture" class="form-label fw-medium">
       ID Voiture <span class="text-danger">*</span>
     </label>
-    <input type="text" class="form-control" id="id_voiture" name="id_voiture">
+    <input type="text" class="form-control" id="id_voiture" name="id_voiture" placeholder="Ex: 1" inputmode="numeric">
   </div>
 
   <!-- Date entretien -->
@@ -139,7 +146,7 @@
     <label for="kilometrage" class="form-label fw-medium">
       Kilométrage <span class="text-danger">*</span>
     </label>
-    <input type="text" class="form-control" id="kilometrage" name="kilometrage" placeholder="Ex: 120000">
+    <input type="text" class="form-control" id="kilometrage" name="kilometrage" placeholder="Ex: 120000" inputmode="numeric">
   </div>
 
   <!-- Type intervention -->
@@ -187,7 +194,7 @@
       Kilométrage prochaine visite
     </label>
     <input type="text" class="form-control" id="km_prochain" name="km_prochain"
-      placeholder="Ex: 150000">
+      placeholder="Ex: 150000" inputmode="numeric">
   </div>
  
                   <!-- Boutons -->
@@ -377,9 +384,13 @@
         }
     });
 
-    // Validation en temps réel
+    // Validation en temps réel pour `id_entretien` supprimée (AUTO_INCREMENT en base)
+
     document.getElementById('id_voiture').addEventListener('input', function() {
         const value = this.value.trim();
+        // Accepter uniquement les chiffres
+        this.value = value.replace(/[^0-9]/g, '');
+        
         if (!value || isNaN(value) || value <= 0) {
             this.style.borderColor = 'red';
         } else {
@@ -387,8 +398,21 @@
         }
     });
 
+    document.getElementById('date_entretien').addEventListener('input', function() {
+        const value = this.value.trim();
+        // Format YYYY-MM-DD
+        if (value.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            this.style.borderColor = '';
+        } else if (value.length > 0) {
+            this.style.borderColor = 'red';
+        }
+    });
+
     document.getElementById('kilometrage').addEventListener('input', function() {
         const value = this.value.trim();
+        // Accepter uniquement les chiffres
+        this.value = value.replace(/[^0-9]/g, '');
+        
         if (!value || isNaN(value) || value < 0) {
             this.style.borderColor = 'red';
         } else {
@@ -398,10 +422,23 @@
 
     document.getElementById('km_prochain').addEventListener('input', function() {
         const value = this.value.trim();
+        // Accepter uniquement les chiffres
+        this.value = value.replace(/[^0-9]/g, '');
+        
         if (value && (isNaN(value) || value < 0)) {
             this.style.borderColor = 'red';
         } else {
             this.style.borderColor = '';
+        }
+    });
+
+    document.getElementById('prochaine_echeance').addEventListener('input', function() {
+        const value = this.value.trim();
+        // Format YYYY-MM-DD
+        if (value.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            this.style.borderColor = '';
+        } else if (value.length > 0) {
+            this.style.borderColor = 'red';
         }
     });
   </script>

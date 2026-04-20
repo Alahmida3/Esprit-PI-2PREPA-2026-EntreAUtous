@@ -1,142 +1,156 @@
+<?php
+require_once '../../config.php';
+require_once '../../controller/FactureController.php';
+
+// Initialisation du contrôleur (C de MVC)
+$controller = new FactureController($pdo);
+
+$entretienId = isset($_GET['entretien']) ? (int)$_GET['entretien'] : null;
+
+// Le contrôleur décide quelles données récupérer
+if ($entretienId) {
+    $factures = $controller->listByEntretien($entretienId);
+} else {
+    $factures = $controller->listAllFactures();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <title>entreAUtous - Mes Factures</title>
-        <link rel="icon" type="image/x-icon" href="../../assets/front/assets/favicon.ico" />
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
-        <link href="../../assets/front/css/styles.css" rel="stylesheet" />
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>entreAUtous - Ma Facturation</title>
+    <link href="../../assets/front/css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
+    <style>
+        #mainNav { background-color: #212529 !important; }
+        .invoice-card-front { background: #fff; border-radius: 15px; border: 1px solid #e9ecef; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .invoice-header { padding: 20px; border-bottom: 2px solid #ffc800; border-radius: 15px 15px 0 0; }
+        .price-total-box { background-color: #f8f9fa; border: 1px solid #ffc800; padding: 15px; border-radius: 10px; text-align: center; }
+        .status-badge { padding: 6px 15px; border-radius: 50px; font-size: 0.8rem; font-weight: bold; }
+        .bg-payee { background-color: #d1e7dd; color: #0f5132; }
+        .bg-attente { background-color: #fff3cd; color: #664d03; }
+        .search-tool-bar { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 30px; }
+        .info-label { color: #6c757d; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; margin-bottom: 3px; }
+    </style>
+</head>
+<body class="pt-5">
+
+<section class="page-section">
+    <div class="container mt-5">
         
-        <style>
-            /* Design Liste de Documents */
-            .invoice-item {
-                background: #fff;
-                border-radius: 10px;
-                transition: all 0.2s ease-in-out;
-                border-left: 5px solid #ffc800; /* Rappel du jaune Agency */
-            }
-            .invoice-item:hover {
-                background: #fdfdfd;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.08) !important;
-                transform: scale(1.01);
-            }
-            .pdf-icon {
-                color: #dc3545; /* Rouge pour le côté PDF */
-                font-size: 2rem;
-            }
-            #mainNav {
-                background-color: #212529 !important;
-            }
-            .btn-download {
-                border-radius: 50px;
-                font-weight: 600;
-                text-transform: uppercase;
-                font-size: 0.8rem;
-            }
-        </style>
-    </head>
-    <body id="page-top" class="bg-light">
-        <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
-            <div class="container">
-                <a class="navbar-brand" href="#page-top">entreAUtous</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-                    Menu <i class="fas fa-bars ms-1"></i>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-                    <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
-                        <li class="nav-item"><a class="nav-link" href="historique_entretien.php">Entretien</a></li>
-                        <li class="nav-item"><a class="nav-link active text-primary" href="liste_factures.php">Factures</a></li>
-                        <li class="nav-item"><a class="nav-link text-warning" href="#">Aide</a></li>
-                        <li class="nav-item"><a class="nav-link text-danger" href="#">Déconnexion</a></li>
-                    </ul>
+        <div class="mb-4">
+            <a href="liste_entretien.php" class="text-dark text-decoration-none fw-bold">
+                <i class="fas fa-arrow-left me-2"></i> Retour à mes entretiens
+            </a>
+        </div>
+
+        <div class="search-tool-bar">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="searchRef" class="form-control border-start-0" placeholder="Rechercher par référence...">
+                    </div>
                 </div>
-            </div>
-        </nav>
-
-        <section class="page-section">
-            <div class="container">
-                <div class="text-center mt-5 mb-5">
-                    <h2 class="section-heading text-uppercase">Mes Documents</h2>
-                    <h3 class="section-subheading text-muted">Consultez et téléchargez vos factures au format PDF.</h3>
-                </div>
-
-                <div class="row justify-content-center">
-                    <div class="col-lg-10">
-                        
-                        <div class="invoice-item card shadow-sm mb-3 p-3">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <i class="fas fa-file-pdf pdf-icon"></i>
-                                </div>
-                                <div class="col">
-                                    <h5 class="mb-0 fw-bold">Facture #FAC-2026-001</h5>
-                                    <small class="text-muted">Intervention : Vidange Moteur | Date : 15 Mars 2026</small>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <div class="fw-bold fs-5 me-3">120.000 TND</div>
-                                </div>
-                                <div class="col-auto">
-                                    <a href="#" class="btn btn-primary btn-download px-4">
-                                        <i class="fas fa-download me-2"></i> Télécharger
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="invoice-item card shadow-sm mb-3 p-3">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <i class="fas fa-file-pdf pdf-icon"></i>
-                                </div>
-                                <div class="col">
-                                    <h5 class="mb-0 fw-bold">Facture #FAC-2026-002</h5>
-                                    <small class="text-muted">Intervention : Freins & Disques | Date : 02 Février 2026</small>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <div class="fw-bold fs-5 me-3">315.000 TND</div>
-                                </div>
-                                <div class="col-auto">
-                                    <a href="#" class="btn btn-primary btn-download px-4">
-                                        <i class="fas fa-download me-2"></i> Télécharger
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="invoice-item card shadow-sm mb-3 p-3">
-                            <div class="row align-items-center">
-                                <div class="col-auto">
-                                    <i class="fas fa-file-pdf pdf-icon"></i>
-                                </div>
-                                <div class="col">
-                                    <h5 class="mb-0 fw-bold">Facture #FAC-2026-003</h5>
-                                    <small class="text-muted">Intervention : Révision Générale | Date : 10 Janvier 2026</small>
-                                </div>
-                                <div class="col-auto text-end">
-                                    <div class="fw-bold fs-5 me-3">450.000 TND</div>
-                                </div>
-                                <div class="col-auto">
-                                    <a href="#" class="btn btn-primary btn-download px-4">
-                                        <i class="fas fa-download me-2"></i> Télécharger
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-filter text-muted"></i></span>
+                        <select id="sortFacture" class="form-select border-start-0">
+                            <option value="recent">Plus récentes</option>
+                            <option value="price-desc">Prix : Élevé à Faible</option>
+                            <option value="price-asc">Prix : Faible à Élevé</option>
+                        </select>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <footer class="footer py-4 bg-white">
-            <div class="container text-center">
-                <div class="text-muted small">Copyright &copy; entreAUtous 2026</div>
-            </div>
-        </footer>
+        <div id="facturesContainer">
+            <?php if (!empty($factures)): ?>
+                <?php foreach ($factures as $f): ?>
+                    
+                    <div class="invoice-card-front" 
+                         data-ref="<?= strtolower(htmlspecialchars($f['ref_facture'])) ?>" 
+                         data-date="<?= $f['date_emission'] ?>" 
+                         data-price="<?= $f['montant_ttc'] ?>">
+                        
+                        <div class="invoice-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="info-label">Référence</span>
+                                <h4 class="mb-0 fw-bold">#<?= htmlspecialchars($f['ref_facture']) ?></h4>
+                            </div>
+                            <span class="status-badge <?= ($f['etat_paiement'] == 'Payée') ? 'bg-payee' : 'bg-attente' ?>">
+                                <?= htmlspecialchars($f['etat_paiement']) ?>
+                            </span>
+                        </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="../../assets/front/js/scripts.js"></script>
-    </body>
+                        <div class="card-body p-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-4 border-end">
+                                    <div class="info-label">Émise le</div>
+                                    <div class="fw-bold"><?= date('d/m/Y', strtotime($f['date_emission'])) ?></div>
+                                    <div class="info-label mt-2">Mode</div>
+                                    <div><i class="fas fa-wallet me-1 text-warning"></i> <?= htmlspecialchars($f['mode_paiement']) ?></div>
+                                </div>
+                                
+                                <div class="col-md-4 text-center border-end">
+                                    <div class="info-label">Détails Taxes</div>
+                                    <div class="h5 mb-0"><?= htmlspecialchars($f['taux_tva']) ?> % TVA</div>
+                                    <small class="text-muted">HT: <?= number_format($f['montant_ht'], 3, '.', ' ') ?> TND</small>
+                                </div>
+
+                                <div class="col-md-4 ps-md-4">
+                                    <div class="price-total-box">
+                                        <div class="info-label">Total TTC</div>
+                                        <div class="h3 mb-0 fw-bold"><?= number_format($f['montant_ttc'], 3, '.', ' ') ?> TND</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="alert alert-light text-center border shadow-sm">
+                    <i class="fas fa-info-circle me-2"></i> Aucune facture disponible.
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchRef');
+    const sortSelect = document.getElementById('sortFacture');
+    const container = document.getElementById('facturesContainer');
+    
+    function updateList() {
+        const query = searchInput.value.toLowerCase();
+        const cards = Array.from(container.getElementsByClassName('invoice-card-front'));
+
+        cards.forEach(card => {
+            card.style.display = card.dataset.ref.includes(query) ? "block" : "none";
+        });
+
+        const sortBy = sortSelect.value;
+        const visibleCards = cards.filter(c => c.style.display !== "none");
+
+        visibleCards.sort((a, b) => {
+            if (sortBy === 'price-asc') return a.dataset.price - b.dataset.price;
+            if (sortBy === 'price-desc') return b.dataset.price - a.dataset.price;
+            return new Date(b.dataset.date) - new Date(a.dataset.date);
+        });
+
+        visibleCards.forEach(card => container.appendChild(card));
+    }
+
+    searchInput.addEventListener('input', updateList);
+    sortSelect.addEventListener('change', updateList);
+});
+</script>
+</body>
 </html>

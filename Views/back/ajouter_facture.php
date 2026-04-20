@@ -32,13 +32,12 @@
                                 <h5 class="mb-0 fw-bold text-dark">Informations de la Facture</h5>
                             </div>
                             <div class="card-body p-4">
-                                <form action="../../controllers/factureController.php" method="POST">
+                                <?php
+                                $entId = isset($_GET['entretien']) ? (int)$_GET['entretien'] : '';
+                                ?>
+                                <form action="../../controller/facture_action.php?action=create" method="POST">
                                     <div class="row g-4">
-                                        
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-semibold text-primary">ID Facture</label>
-                                            <input type="text" class="form-control" name="id_facture" required>
-                                        </div>
+                                        <!-- id_facture is AUTO_INCREMENT in DB; do not provide it -->
                                         <div class="col-md-4">
                                             <label class="form-label fw-semibold">Référence Facture</label>
                                             <input type="text" class="form-control" name="ref_facture" placeholder="Ex: FAC-001" required>
@@ -48,14 +47,8 @@
                                             <input type="date" class="form-control" name="date_emission" required>
                                         </div>
 
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">ID Entretien lié</label>
-                                            <input type="text" class="form-control" name="id_entretien">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-semibold">ID Rendez-vous</label>
-                                            <input type="text" class="form-control" name="id_rdv">
-                                        </div>
+                                        <!-- entretien passed as hidden field (foreign key) -->
+                                        <input type="hidden" name="entretien" value="<?php echo htmlspecialchars($entId); ?>">
 
                                         <div class="col-md-4">
                                             <label class="form-label fw-semibold">Montant HT</label>
