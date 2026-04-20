@@ -1,3 +1,18 @@
+<?php
+require_once __DIR__ . '/../../config/connexion.php';
+require_once __DIR__ . '/../../Model/MonModule.php';
+require_once __DIR__ . '/../../Controller/MonModuleController.php';
+
+$garageServices = [];
+try {
+    $pdo = getPDOConnection();
+    $model = new MonModule($pdo);
+    $controller = new MonModuleController($model);
+    $garageServices = $controller->getGarageServices();
+} catch (PDOException $e) {
+    $garageServices = [];
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -14,7 +29,7 @@
 <body id="page-top">
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
         <div class="container">
-            <a class="navbar-brand" href="#page-top">GARAGE EXPERT</a>
+            <a class="navbar-brand" href="#page-top">EntreAuTous</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
                 Menu
                 <i class="fas fa-bars ms-1"></i>
@@ -70,14 +85,59 @@
                     <p class="text-muted">Planification de vos vidanges et contrôles techniques. Consultez votre historique de maintenance en un clic.</p>
                 </div>
             </div>
+            <div class="text-center mt-5">
+                <button class="btn btn-secondary btn-xl text-uppercase" id="catalogueBtn">CATALOGUE</button>
+            </div>
         </div>
     </section>
 
-    <section class="page-section bg-light" id="portfolio">
+    <section class="page-section bg-light" id="portfolio" style="display: none;">
         <div class="container">
             <div class="text-center">
                 <h2 class="section-heading text-uppercase">Spécialités par Véhicules</h2>
                 <h3 class="section-subheading text-muted">Une expertise adaptée à chaque type de carrosserie.</h3>
+                <button class="btn btn-secondary btn-sm text-uppercase mt-3" id="backToServicesBtn">Retour aux Services</button>
+                <button class="btn btn-primary btn-sm text-uppercase mt-3" id="afficherListeBtn">Afficher Liste</button>
+            </div>
+            <div class="row" id="garage-list-section" style="display:none; margin-top:40px;">
+                <div class="col-12">
+                    <div class="card p-4 shadow-sm" style="background:#fff; color:#212529; border-radius:16px;">
+                        <h3 class="section-heading text-uppercase">Liste des garages et services</h3>
+                        <p class="section-subheading text-muted">Chaque garage affiche au moins deux services disponibles.</p>
+                        <div class="table-responsive mt-4">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>ID Garage</th>
+                                        <th>Nom Garage</th>
+                                        <th>Adresse</th>
+                                        <th>Heure ouverture</th>
+                                        <th>Heure fermeture</th>
+                                        <th>Services</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (empty($garageServices)): ?>
+                                        <tr>
+                                            <td colspan="6">Aucun garage disponible.</td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php foreach ($garageServices as $garage): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($garage['id_garage'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?php echo htmlspecialchars($garage['nom_garage'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?php echo htmlspecialchars($garage['adresse'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?php echo htmlspecialchars($garage['heure_ouv'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?php echo htmlspecialchars($garage['heure_fer'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                <td><?php echo htmlspecialchars(implode(' / ', $garage['services']), ENT_QUOTES, 'UTF-8'); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <div class="col-lg-4 col-sm-6 mb-4">
@@ -145,5 +205,44 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/scripts.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const catalogueBtn = document.getElementById('catalogueBtn');
+            const servicesSection = document.getElementById('services');
+            const portfolioSection = document.getElementById('portfolio');
+
+            catalogueBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                servicesSection.style.display = 'none';
+                portfolioSection.style.display = 'block';
+                catalogueBtn.style.display = 'none';
+            });
+
+            const backToServicesBtn = document.getElementById('backToServicesBtn');
+            const afficherListeBtn = document.getElementById('afficherListeBtn');
+            const garageListSection = document.getElementById('garage-list-section');
+
+            backToServicesBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                servicesSection.style.display = 'block';
+                portfolioSection.style.display = 'none';
+                garageListSection.style.display = 'none';
+                catalogueBtn.style.display = 'inline-block';
+                servicesSection.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            afficherListeBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                servicesSection.style.display = 'none';
+                portfolioSection.style.display = 'block';
+                garageListSection.style.display = 'block';
+                catalogueBtn.style.display = 'none';
+                garageListSection.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
 </body>
 </html>
