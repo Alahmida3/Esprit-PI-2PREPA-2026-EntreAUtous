@@ -1,0 +1,102 @@
+<div id="miniSidebar">
+  <div class="brand-logo">
+    <a class="d-flex align-items-center gap-2" href="admin.php">
+      <img src="@@webRoot/assets/images/brand/logo/logo-icon.svg" alt="AuTout" />
+      <span class="fw-bold fs-4 site-logo-text">AuTout</span>
+    </a>
+  </div>
+  
+  <ul class="navbar-nav flex-column">
+
+    <li class="nav-item">
+      <a class="nav-link" href="admin.php">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-layout-dashboard">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M4 4h6v8h-6z" /><path d="M4 16h6v4h-6z" /><path d="M14 12h6v8h-6z" /><path d="M14 4h6v5h-6z" />
+          </svg>
+        </span>
+        <span class="text">Tableau de bord</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link dropdown-toggle collapsed" href="#!" data-bs-toggle="collapse" data-bs-target="#navGarage" aria-expanded="false" aria-controls="navGarage">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-tools">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M3 21h4l13 -13a1.5 1.5 0 0 0 -4 -4l-13 13v4" /><path d="M14.5 5.5l3 3" />
+          </svg>
+        </span>
+        <span class="text">Atelier & Réparation</span>
+      </a>
+      <div id="navGarage" class="collapse" data-bs-parent="#navbarVerticalNav">
+        <ul class="nav flex-column">
+          <li class="nav-item"><a class="nav-link" href="#">Véhicules en cours</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Diagnostics Scan</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Rendez-vous</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link dropdown-toggle collapsed" href="#!" data-bs-toggle="collapse" data-bs-target="#navCars" aria-expanded="false" aria-controls="navCars">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-car">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" />
+            <path d="M5 17h-2v-6l2 -5h9l4 5v1h-2" />
+          </svg>
+        </span>
+        <span class="text">Parc & Ventes</span>
+        <span class="badge rounded-pill bg-primary ms-2">New</span>
+      </a>
+      <div id="navCars" class="collapse" data-bs-parent="#navbarVerticalNav">
+        <ul class="nav flex-column">
+          <li class="nav-item"><a class="nav-link" href="#">Inventaire</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Vendre un véhicule</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Stock de pièces</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link position-relative" href="#">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-mail">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <rect x="3" y="5" width="18" height="14" rx="2" /><polyline points="3 7 12 13 21 7" />
+          </svg>
+        </span>
+        <span class="text">Messages</span>
+        <span class="position-absolute top-0 start-100 translate-middle badge border border-light rounded-circle bg-danger p-1"><span class="visually-hidden">unread messages</span></span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="#">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-users">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
+          </svg>
+        </span>
+        <span class="text">Clients & Staff</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="#">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37.996 .608 2.296 .07 2.572 -1.065z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </span>
+        <span class="text">Configuration</span>
+      </a>
+    </li>
+
+  </ul>
+</div>

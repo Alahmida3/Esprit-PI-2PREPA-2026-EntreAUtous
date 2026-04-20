@@ -10947,7 +10947,8 @@ header.masthead {
   padding-bottom: 6rem;
   text-align: center;
   color: #fff;
-  background-image: url("../assets/img/header-bg.jpg");
+  /* Depuis le dossier CSS, on remonte d'un cran pour aller dans img */
+  background-image: url("../img/voiture.jpg") !important;
   background-repeat: no-repeat;
   background-attachment: scroll;
   background-position: center center;

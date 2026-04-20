@@ -2,44 +2,40 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login</title>
-
-    <!-- FRONT TEMPLATE CSS UNIQUEMENT -->
-    <link href="/web/assets/front/css/styles.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Connexion - Garage Services</title>
+    <link href="../../assets/front/css/styles.css" rel="stylesheet" />
+    <style>
+        body { background-color: #212529; color: white; padding-top: 100px; }
+        .login-card { max-width: 400px; margin: auto; background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; }
+    </style>
 </head>
-
 <body>
+    <div class="container">
+        <div class="login-card">
+            <h2 class="text-center text-uppercase">Connexion</h2>
+            <hr class="bg-primary">
+            
+            <?php if(isset($_GET['error'])): ?>
+                <div class="alert alert-danger">Identifiants incorrects</div>
+            <?php endif; ?>
 
-<!-- HEADER STYLE AGENCY -->
-<header class="masthead">
-    <div class="container text-center">
-
-        <div class="bg-light p-5 rounded">
-
-            <h2>Connexion</h2>
-
-            <form action="/web/controller/login_process.php" method="POST">
-
+            <form action="../../controller/UserController.php" method="POST">
+                <input type="hidden" name="action" value="login">
                 <div class="mb-3">
-                    <input class="form-control" type="email" name="email" placeholder="Email" required>
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" required placeholder="admin@garage.com">
                 </div>
-
                 <div class="mb-3">
-                    <input class="form-control" type="password" name="password" placeholder="Mot de passe" required>
+                    <label>Mot de passe</label>
+                    <input type="password" name="mot_de_passe" class="form-control" required>
                 </div>
-
-                <button class="btn btn-primary w-100">Se connecter</button>
-
+                <input type="hidden" name="action" value="login"> <button type="submit" class="btn btn-primary w-100">Se connecter</button>
             </form>
-
-            <br>
-            <a href="register.php">Créer un compte</a>
-
+            <div class="text-center mt-3">
+                <a href="register.php" class="text-white-50">Pas encore de compte ?</a>
+            </div>
         </div>
-
     </div>
-</header>
-
 </body>
 </html>
