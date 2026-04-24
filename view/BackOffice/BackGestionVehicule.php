@@ -1,5 +1,5 @@
 <?php
-require_once "../../model/rendezvous.php";
+require_once "../../model/rendezvousC.php";
 require_once "../../controller/RendezVous.php";
 
 ?>

@@ -97,34 +97,36 @@ class RendezVousC {
      * Afficher une ligne du tableau
      */
     public function afficher($rdv) {
-        $r = (array)$rdv;
-        $statut = ucfirst(strtolower($r['statutRDV'] ?? 'en attente'));
+    $r = (array)$rdv;
+    $statut = ucfirst(strtolower($r['statutRDV'] ?? 'en attente'));
 
-        echo '
-        <tr>
-            <td class="ps-4">
-                <span class="text-info">#' . htmlspecialchars($r['idRDV']) . '</span>
-            </td>
-            <td>' . htmlspecialchars($r['dateRDV']) . '</td>
-            <td>' . htmlspecialchars($r['heureRDV']) . '</td>
-            <td>' . htmlspecialchars($r['type_serviceRDV']) . '</td>
-            <td>' . $statut . '</td>
-            <td><span class="text-white">VEH-' . htmlspecialchars($r['idVehicule']) . '</span></td>
-            <td>' . htmlspecialchars($r['idclientRDV']) . '</td>
-            <td>' . htmlspecialchars($r['descriptionRDV'] ?? 'Aucune description') . '</td>
-            <td class="text-end pe-4">
-                <a href="modifierRDV.php?id=' . $r['idRDV'] . '"
-                   class="btn btn-sm btn-outline-warning me-2">
-                    Modifier
-                </a>
-                <a href="?delete_id=' . $r['idRDV'] . '"
-                   class="btn btn-sm btn-outline-danger"
-                   onclick="return confirm(\'Voulez-vous vraiment supprimer le rendez-vous #' . $r['idRDV'] . ' ?\')">
-                    Supprimer
-                </a>
-            </td>
-        </tr>';
-    }
-
-} // Fin de la classe
+    echo '
+    <tr>
+        <td class="ps-4">
+            <span class="text-info">#' . htmlspecialchars($r['idRDV']) . '</span>
+        </td>
+        <td>' . htmlspecialchars($r['dateRDV']) . '</td>
+        <td>' . htmlspecialchars($r['heureRDV']) . '</td>
+        <td>' . htmlspecialchars($r['type_serviceRDV']) . '</td>
+        <td>' . $statut . '</td>
+        <td><span class="text-white">VEH-' . htmlspecialchars($r['idVehicule']) . '</span></td>
+        <td>' . htmlspecialchars($r['idclientRDV']) . '</td>
+        <td>' . htmlspecialchars($r['descriptionRDV'] ?? 'Aucune description') . '</td>
+        
+       
+        <td class="text-end pe-4">
+            <a href="modifierRDV.php?id=' . $r['idRDV'] . '"
+               class="btn btn-sm btn-outline-warning me-2">
+                Modifier
+            </a>
+            <a href="?delete_id=' . $r['idRDV'] . '"
+               class="btn btn-sm btn-outline-danger"
+               onclick="return confirm(\'Voulez-vous vraiment supprimer le rendez-vous #' . $r['idRDV'] . ' ?\')">
+                Supprimer RDV
+            </a>
+        </td>
+    </tr>';
+}
+    
+}
 ?>

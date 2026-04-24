@@ -1,9 +1,35 @@
 <?php
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/../../controller/Vehicule.php');
+require_once(__DIR__ . '/../../controller/RendezVous.php');
+
 $message     = '';
 $messageType = '';
 
+$vC = new VoitureC(); 
+$liste_vehicules = $vC->afficherVehicule(); 
+
+$controllerRDV = new RendezVousC();
+$queryRDV = $controllerRDV->getAll(); 
+
+$rdvParVehicule = [];
+
+// ÉTAPE CRUCIALE : On transforme l'objet PDO en tableau associatif
+if ($queryRDV) {
+    $tousLesRDV = is_array($queryRDV) ? $queryRDV : $queryRDV->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($tousLesRDV as $rdv) {
+        $idV = $rdv['idVehicule'];
+        // On crée un tableau de rendez-vous pour chaque véhicule
+        $rdvParVehicule[$idV][] = $rdv; 
+    }
+}
+//supprimer un rendez vous  
+if (isset($_GET['delete_id'])) {
+    $controllerRDV->delete((int)$_GET['delete_id']);
+    header("Location: GestionVehicule.php"); // Rafraîchit la page
+    exit();
+}
 // ===== TRAITEMENT MODIFICATION =====
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'modifier') {
     try {
@@ -145,10 +171,18 @@ if (isset($_GET['delete_id'])) {
 }
 
 // ===== RÉCUPÉRER CLIENTS =====
+// ===== RÉCUPÉRER CLIENTS =====
 try {
-    $pdo     = config::getConnexion();
-    $stmt    = $pdo->query("SELECT id_client, nomclient FROM user ORDER BY nomclient");
-    $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $pdo = config::getConnexion();
+    // Vérifier d'abord la structure de la table user
+    try {
+        $stmt = $pdo->query("SELECT id_client, nomclient FROM user ORDER BY nomclient");
+        $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Si 'nomclient' n'existe pas, essayer 'nom_client'
+        $stmt = $pdo->query("SELECT id_client, nom_client as nomclient FROM user ORDER BY nom_client");
+        $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 } catch (Exception $e) {
     $clients = [];
 }
@@ -178,7 +212,7 @@ if (isset($_POST['search_client']) && !empty($_POST['filtre_client'])) {
 }
 
 // ===== RÉCUPÉRER LE DERNIER RDV PAR VÉHICULE =====
-$rdvParVehicule = [];
+$dernierRdvParVehicule = [];
 try {
     $pdo  = config::getConnexion();
     $stmt = $pdo->query("
@@ -191,10 +225,10 @@ try {
         ) latest ON r.idRDV = latest.maxId
     ");
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $rdv) {
-        $rdvParVehicule[$rdv['idVehicule']] = $rdv;
+        $dernierRdvParVehicule[$rdv['idVehicule']] = $rdv;
     }
 } catch (Exception $e) {
-    $rdvParVehicule = [];
+    $dernierRdvParVehicule = [];
 }
 ?>
 <!DOCTYPE html>
@@ -302,28 +336,60 @@ try {
                                     <strong>Kilométrage :</strong> <?php echo number_format($vehicule['kilometrageV'] ?? 0, 0, ',', ' '); ?> km
                                 </p>
 
-                                <?php if (isset($rdvParVehicule[$vehicule['idVehicule']])): ?>
-                                    <?php $rdv = $rdvParVehicule[$vehicule['idVehicule']]; ?>
-                                    <div class="alert alert-warning py-1 px-2 mb-2" style="font-size:0.85rem;">
-                                        📅 <strong>Prochain RDV :</strong>
-                                        <?= htmlspecialchars($rdv['dateRDV']) ?>
-                                        à <?= htmlspecialchars(substr($rdv['heureRDV'], 0, 5)) ?>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="alert alert-secondary py-1 px-2 mb-2" style="font-size:0.85rem;">
-                                        📅 <strong>Aucun RDV planifié</strong>
-                                    </div>
-                                <?php endif; ?>
+                                <div class="mt-2">
+    <?php 
+    $currentIdVehicule = $vehicule['idVehicule']; 
+    
+    if (isset($rdvParVehicule[$currentIdVehicule])): ?>
+        <p class="small fw-bold text-muted mb-1 text-start ps-2">Services programmés :</p>
+        
+        <?php foreach ($rdvParVehicule[$currentIdVehicule] as $unRdv): ?>
+            <div class="alert alert-warning py-2 px-3 mb-2 d-flex justify-content-between align-items-center" 
+                style="font-size:0.85rem; border-left: 4px solid #ffc107; color: #856404; background-color: #fff3cd; border-radius: 8px;">
+                
+                <div style="text-align: left;">
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="me-3">📅 <?= htmlspecialchars($unRdv['dateRDV']) ?></span>
+                        <span>à <?= htmlspecialchars(substr($unRdv['heureRDV'], 0, 5)) ?></span>
+                    </div>
+                    <div>
+                        🔧 <strong><?= htmlspecialchars($unRdv['type_serviceRDV']) ?></strong>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column align-items-center gap-1">
+                    <button class="btn btn-sm btn-outline-info" 
+                            onclick="openEditRDVModal(<?= $unRdv['idRDV']; ?>)"
+                            style="font-size: 0.7rem; padding: 2px 6px;">
+                        <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    
+                    <a href="?delete_id=<?= $unRdv['idRDV'] ?>" 
+                       class="btn btn-sm btn-outline-danger"
+                       style="font-size: 0.7rem; padding: 2px 6px;"
+                       onclick="return confirm('Voulez-vous vraiment supprimer ce rendez-vous ?')">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+        <?php endforeach; ?>
+
+    <?php else: ?>
+        <div class="alert alert-secondary py-1 px-2 mb-2" style="font-size:0.8rem; text-align: left;">
+            📅 <strong>Aucun RDV planifié</strong>
+        </div>
+    <?php endif; ?>
+</div>
 
                                 <div class="d-flex justify-content-center gap-2">
                                     <button class="btn btn-warning btn-sm"
                                             data-bs-toggle="modal" data-bs-target="#modalModifierVehicule"
                                             onclick="editVehicule(<?php
                                                 $v = $vehicule;
-                                                if (isset($rdvParVehicule[$vehicule['idVehicule']])) {
-                                                    $v['rdv_id']    = $rdvParVehicule[$vehicule['idVehicule']]['idRDV'];
-                                                    $v['rdv_date']  = $rdvParVehicule[$vehicule['idVehicule']]['dateRDV'];
-                                                    $v['rdv_heure'] = $rdvParVehicule[$vehicule['idVehicule']]['heureRDV'];
+                                                if (isset($dernierRdvParVehicule[$vehicule['idVehicule']])) {
+                                                    $v['rdv_id']    = $dernierRdvParVehicule[$vehicule['idVehicule']]['idRDV'];
+                                                    $v['rdv_date']  = $dernierRdvParVehicule[$vehicule['idVehicule']]['dateRDV'];
+                                                    $v['rdv_heure'] = $dernierRdvParVehicule[$vehicule['idVehicule']]['heureRDV'];
                                                 }
                                                 echo htmlspecialchars(json_encode($v));
                                             ?>)">
@@ -379,23 +445,23 @@ try {
                         <input type="hidden" name="action" value="modifier">
                         <input type="hidden" name="idVehicule" id="edit_idVehicule">
                         <div class="mb-3">
-                            <label class="form-label">Marque *</label>
+                            <label class="form-label">Marque </label>
                             <input type="text" name="marque" id="edit_marque" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Immatriculation *</label>
+                            <label class="form-label">Immatriculation </label>
                             <input type="text" name="immatriculation" id="edit_immatriculation" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Date d'ajout *</label>
+                            <label class="form-label">Date d'ajout </label>
                             <input type="date" name="date_ajout" id="edit_date_ajout" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Kilométrage (km) *</label>
+                            <label class="form-label">Kilométrage (km) </label>
                             <input type="number" name="kilometrage" id="edit_kilometrage" class="form-control" min="0" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Client *</label>
+                            <label class="form-label">Client </label>
                             <select name="idClient" id="edit_idClient" class="form-control" required>
                                 <option value="">-- Sélectionner un client --</option>
                                 <?php foreach ($clients as $client): ?>
@@ -449,6 +515,17 @@ try {
             </div>
         </div>
     </div>
+    <!-- ===== MODAL MODIFICATION RDV (header et bouton colorés dynamiquement via fragment) ===== -->
+    <div class="modal fade" id="modalModifierRDV" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg overflow-hidden" id="modalContentModifierRDV">
+                <!-- Le fragment PHP (header + body + footer + scripts) est injecté ici par fetch -->
+                <div class="text-center p-5">
+                    <div class="spinner-border text-info" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer py-4">
         <div class="container text-center">Copyright &copy; Smart Supply 2026</div>
@@ -458,6 +535,39 @@ try {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="../assets/Front office/js/scripts.js"></script>
     <script>
+        //Modification du RDV
+       function openEditRDVModal(idRDV) {
+    const modalEl   = document.getElementById('modalModifierRDV');
+    const contentEl = document.getElementById('modalContentModifierRDV');
+    const myModal   = new bootstrap.Modal(modalEl);
+
+    contentEl.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-warning" role="status"></div><p class="mt-2 text-muted">Chargement...</p></div>`;
+    myModal.show();
+
+    fetch('traitementRDV.php?id=' + idRDV, {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erreur HTTP ' + response.status);
+        return response.text();
+    })
+    .then(html => {
+        contentEl.innerHTML = html;
+        contentEl.querySelectorAll('script').forEach(oldScript => {
+            const newScript = document.createElement('script');
+            newScript.textContent = oldScript.textContent;
+            document.body.appendChild(newScript);
+            document.body.removeChild(newScript);
+        });
+    })
+    .catch(err => {
+        contentEl.innerHTML = `<div class="alert alert-danger m-3"><strong>❌ Erreur de chargement.</strong><br><small>${err.message}</small></div>`;
+    });
+}
+
+
+
         // ===== FONCTION EDIT VEHICULE (une seule version) =====
         function editVehicule(vehicule) {
             document.getElementById('edit_idVehicule').value      = vehicule.idVehicule;
@@ -490,19 +600,15 @@ try {
         }, 4000);
 
         function openRDVModal(idVehicule) {
-            const modalEl   = document.getElementById('modalRDV');
-            const contentEl = document.getElementById('modalContentRDV');
+            const modalEl   = document.getElementById('modalModifierRDV');
+            const contentEl = document.getElementById('modalContentModifierRDV');
             const myModal   = new bootstrap.Modal(modalEl);
 
-            contentEl.innerHTML = `
-                <div class="text-center p-4">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-2 text-muted">Chargement du formulaire...</p>
-                </div>`;
-
+            contentEl.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-warning" role="status"></div><p class="mt-2 text-muted">Chargement...</p></div>`;
             myModal.show();
 
-            fetch('formulaireRDV.php?id=' + idVehicule, {
+            // Appel à traitementRDV.php sans ID pour mode AJOUT avec le véhicule pré-sélectionné
+            fetch('traitementRDV.php?vehicle=' + idVehicule, {
                 method: 'GET',
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
@@ -520,11 +626,7 @@ try {
                 });
             })
             .catch(err => {
-                contentEl.innerHTML = `
-                    <div class="alert alert-danger m-3">
-                        <strong>❌ Erreur de chargement du formulaire.</strong><br>
-                        <small>${err.message}</small>
-                    </div>`;
+                contentEl.innerHTML = `<div class="alert alert-danger m-3"><strong>❌ Erreur de chargement.</strong><br><small>${err.message}</small></div>`;
             });
         }
 

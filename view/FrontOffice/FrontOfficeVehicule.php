@@ -1,11 +1,12 @@
 <?php
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/../../controller/Vehicule.php');
+require_once(__DIR__ . '/../../controller/rendezvous.php');
 
 $message     = '';
 $messageType = '';
 
-// ===== TRAITEMENT AJOUT =====
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $nomImage = "default.jpg";
