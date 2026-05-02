@@ -14,7 +14,79 @@ $queryRDV = $controllerRDV->getAll();
 
 $rdvParVehicule = [];
 
-// ÉTAPE CRUCIALE : On transforme l'objet PDO en tableau associatif
+// ═══════════════════════════════════════════════════════════════════════════
+// Fonctions pour gérer les couleurs et textes des statuts RDV
+// ═══════════════════════════════════════════════════════════════════════════
+
+function getStatusColor($statut) {
+    if (empty($statut)) $statut = 'en attente';
+    
+    // Convertir en minuscules pour comparaison
+    $statut_lower = strtolower(trim($statut));
+    
+    switch ($statut_lower) {
+        case 'confirmé':
+        case 'confirme':
+            return 'status-confirme';
+        case 'en attente':
+            return 'status-attente';
+        case 'annulé':
+        case 'annule':
+            return 'status-annule';
+        case 'terminé':
+        case 'termine':
+            return 'status-termine';
+        default:
+            return 'status-attente';
+    }
+}
+
+function getStatusText($statut) {
+    if (empty($statut)) $statut = 'en attente';
+    
+    $statut_lower = strtolower(trim($statut));
+    
+    switch ($statut_lower) {
+        case 'confirmé':
+        case 'confirme':
+            return '✅ Confirmé';
+        case 'en attente':
+            return '⏳ En attente';
+        case 'annulé':
+        case 'annule':
+            return '❌ Annulé';
+        case 'terminé':
+        case 'termine':
+            return '✓ Terminé';
+        default:
+            return '⏳ En attente';
+    }
+}
+
+function getStatusIcon($statut) {
+    if (empty($statut)) $statut = 'en attente';
+    
+    $statut_lower = strtolower(trim($statut));
+    
+    switch ($statut_lower) {
+        case 'confirmé':
+        case 'confirme':
+            return '✅';
+        case 'en attente':
+            return '⏳';
+        case 'annulé':
+        case 'annule':
+            return '❌';
+        case 'terminé':
+        case 'termine':
+            return '✓';
+        default:
+            return '⏳';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+
 if ($queryRDV) {
     $tousLesRDV = is_array($queryRDV) ? $queryRDV : $queryRDV->fetchAll(PDO::FETCH_ASSOC);
 
@@ -244,6 +316,55 @@ try {
         .alert-fixed         { position:fixed; top:90px; right:20px; z-index:9999; min-width:300px; }
         .vehicle-card        { transition:all 0.3s ease; }
         .vehicle-card:hover  { transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.1); }
+        
+        /* Statut: Confirmé - Bleu */
+        .status-confirme {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border-left: 4px solid #17a2b8 !important;
+            color: #0c5460;
+        }
+        
+        /* Statut: En attente - Orange */
+        .status-attente {
+            background: linear-gradient(135deg, #ffe8cc 0%, #ffd999 100%);
+            border-left: 4px solid #ff9800 !important;
+            color: #e65100;
+        }
+        
+        /* Statut: Annulé - Rouge */
+        .status-annule {
+            background: linear-gradient(135deg, #ffcccc 0%, #ff9999 100%);
+            border-left: 4px solid #dc3545 !important;
+            color: #721c24;
+        }
+        
+        /* Statut: Terminé - Vert */
+        .status-termine {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-left: 4px solid #28a745 !important;
+            color: #155724;
+        }
+        
+        /* Badge de statut pour tableau */
+        .badge.status-confirme {
+            background-color: #17a2b8 !important;
+            color: white !important;
+        }
+        
+        .badge.status-attente {
+            background-color: #ff9800 !important;
+            color: white !important;
+        }
+        
+        .badge.status-annule {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .badge.status-termine {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
     </style>
 </head>
 <body id="page-top">
@@ -341,19 +462,34 @@ try {
     $currentIdVehicule = $vehicule['idVehicule']; 
     
     if (isset($rdvParVehicule[$currentIdVehicule])): ?>
-        <p class="small fw-bold text-muted mb-1 text-start ps-2">Services programmés :</p>
+        <p class="small fw-bold text-muted mb-2 text-start ps-2">Services programmés :</p>
         
-        <?php foreach ($rdvParVehicule[$currentIdVehicule] as $unRdv): ?>
-            <div class="alert alert-warning py-2 px-3 mb-2 d-flex justify-content-between align-items-center" 
-                style="font-size:0.85rem; border-left: 4px solid #ffc107; color: #856404; background-color: #fff3cd; border-radius: 8px;">
+        <?php foreach ($rdvParVehicule[$currentIdVehicule] as $unRdv): 
+            // Détection automatique du nom de la colonne statut
+            $statutRDV = 'En attente';
+            if (isset($unRdv['statutRDV']) && !empty($unRdv['statutRDV'])) {
+                $statutRDV = $unRdv['statutRDV'];
+            } elseif (isset($unRdv['statut']) && !empty($unRdv['statut'])) {
+                $statutRDV = $unRdv['statut'];
+            } elseif (isset($unRdv['statut_rdv']) && !empty($unRdv['statut_rdv'])) {
+                $statutRDV = $unRdv['statut_rdv'];
+            }
+            
+            // Récupération des couleurs et textes selon le statut
+            $statusClass = getStatusColor($statutRDV);
+            $statusText = getStatusText($statutRDV);
+        ?>
+            <div class="alert py-2 px-3 mb-2 d-flex justify-content-between align-items-center <?php echo $statusClass; ?>"
+                style="font-size:0.85rem; border-left: 4px solid; border-radius: 8px;">
                 
-                <div style="text-align: left;">
-                    <div class="d-flex align-items-center mb-1">
-                        <span class="me-3">📅 <?= htmlspecialchars($unRdv['dateRDV']) ?></span>
+                <div style="text-align: left; flex: 1;">
+                    <div class="d-flex align-items-center mb-1 flex-wrap gap-2">
+                        <span>📅 <?= htmlspecialchars($unRdv['dateRDV']) ?></span>
                         <span>à <?= htmlspecialchars(substr($unRdv['heureRDV'], 0, 5)) ?></span>
+                        <span style="font-weight: 700; font-size: 0.9rem;"><?= $statusText ?></span>
                     </div>
                     <div>
-                        🔧 <strong><?= htmlspecialchars($unRdv['type_serviceRDV']) ?></strong>
+                        🔧 <strong><?= htmlspecialchars($unRdv['type_serviceRDV'] ?? 'Entretien') ?></strong>
                     </div>
                 </div>
 
@@ -418,6 +554,9 @@ try {
             </div>
         </div>
     </section>
+
+    <!-- ===== SECTION TABLEAU DES RENDEZ-VOUS ===== -->
+    
 
     <!-- ===== MODAL AJOUT ===== -->
     <div class="modal fade" id="modalVehicule" tabindex="-1" aria-hidden="true">
