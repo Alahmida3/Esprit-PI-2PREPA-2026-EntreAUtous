@@ -30,6 +30,7 @@ if (!class_exists('RendezVous')) {
         public function getIdVehicule() { return $this->idVehicule; }
         public function getIdClientRDV() { return $this->idclientRDV; }
         public function getDescriptionRDV() { return $this->descriptionRDV; }
+        
     }
 }
 ?>

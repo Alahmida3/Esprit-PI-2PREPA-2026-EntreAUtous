@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/../../controller/Vehicule.php');
 require_once(__DIR__ . '/../../controller/RendezVous.php');
@@ -6,10 +7,38 @@ require_once(__DIR__ . '/../../controller/RendezVous.php');
 $message     = '';
 $messageType = '';
 
+// Vérifier s'il y a un message de succès dans la session
+if (isset($_SESSION['rdv_success_message'])) {
+    $message = $_SESSION['rdv_success_message'];
+    $messageType = 'success';
+    unset($_SESSION['rdv_success_message']);
+}
+
 $vC = new VoitureC(); 
 $liste_vehicules = $vC->afficherVehicule(); 
 
+// ===== CHARGEMENT DES RENDEZ-VOUS =====
+// ===== CHARGEMENT DES RENDEZ-VOUS (CORRIGÉ AVEC GESTION DES NULL) =====
 $controllerRDV = new RendezVousC();
+$queryRDV = $controllerRDV->getAll(); 
+
+$rdvParVehicule = [];
+
+if ($queryRDV) {
+    // Gérer à la fois les tableaux et les objets PDOStatement
+    $tousLesRDV = is_array($queryRDV) ? $queryRDV : $queryRDV->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($tousLesRDV as $rdv) {
+        // Support des deux noms de colonne possibles
+        $idV = $rdv['idVehicule'] ?? $rdv['id_vehicule'] ?? 0;
+        if ($idV > 0) {
+            if (!isset($rdvParVehicule[$idV])) {
+                $rdvParVehicule[$idV] = [];
+            }
+            $rdvParVehicule[$idV][] = $rdv;
+        }
+    }
+}
 $queryRDV = $controllerRDV->getAll(); 
 
 $rdvParVehicule = [];
@@ -544,6 +573,15 @@ try {
                         </div>
                     </div>
                     <?php endwhile; ?>
+
+                    <!-- Force refresh après action DELETE uniquement -->
+                    <?php
+                if (isset($_GET['refresh'])) {
+                    header("Location: GestionVehicule.php");
+                    exit();
+                }
+                ?>
+
                 <?php else: ?>
                     <div class="col-12 text-center">
                         <p class="text-muted">
@@ -619,16 +657,7 @@ try {
 
                         <!-- ===== CHAMPS RDV ===== -->
                         <hr>
-                        <h6 class="fw-bold text-warning mb-3">📅 Rendez-vous</h6>
-                        <input type="hidden" name="rdv_id" id="edit_rdv_id">
-                        <div class="mb-3">
-                            <label class="form-label">Date du RDV</label>
-                            <input type="date" name="rdv_date" id="edit_rdv_date" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Heure du RDV</label>
-                            <input type="time" name="rdv_heure" id="edit_rdv_heure" class="form-control">
-                        </div>
+                        
 
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -675,7 +704,7 @@ try {
     <script src="../assets/Front office/js/scripts.js"></script>
     <script>
         //Modification du RDV
-       function openEditRDVModal(idRDV) {
+function openEditRDVModal(idRDV) {
     const modalEl   = document.getElementById('modalModifierRDV');
     const contentEl = document.getElementById('modalContentModifierRDV');
     const myModal   = new bootstrap.Modal(modalEl);
@@ -739,35 +768,34 @@ try {
         }, 4000);
 
         function openRDVModal(idVehicule) {
-            const modalEl   = document.getElementById('modalModifierRDV');
-            const contentEl = document.getElementById('modalContentModifierRDV');
-            const myModal   = new bootstrap.Modal(modalEl);
+    const modalEl   = document.getElementById('modalRDV');
+    const contentEl = document.getElementById('modalContentRDV');
+    const myModal   = new bootstrap.Modal(modalEl);
 
-            contentEl.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-warning" role="status"></div><p class="mt-2 text-muted">Chargement...</p></div>`;
-            myModal.show();
+    contentEl.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-warning" role="status"></div><p class="mt-2 text-muted">Chargement...</p></div>`;
+    myModal.show();
 
-            // Appel à traitementRDV.php sans ID pour mode AJOUT avec le véhicule pré-sélectionné
-            fetch('traitementRDV.php?vehicle=' + idVehicule, {
-                method: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Erreur HTTP ' + response.status);
-                return response.text();
-            })
-            .then(html => {
-                contentEl.innerHTML = html;
-                contentEl.querySelectorAll('script').forEach(oldScript => {
-                    const newScript = document.createElement('script');
-                    newScript.textContent = oldScript.textContent;
-                    document.body.appendChild(newScript);
-                    document.body.removeChild(newScript);
-                });
-            })
-            .catch(err => {
-                contentEl.innerHTML = `<div class="alert alert-danger m-3"><strong>❌ Erreur de chargement.</strong><br><small>${err.message}</small></div>`;
-            });
-        }
+    fetch('formulaireRDV.php?id_vehicule=' + idVehicule, {
+        method: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erreur HTTP ' + response.status);
+        return response.text();
+    })
+    .then(html => {
+        contentEl.innerHTML = html;
+        contentEl.querySelectorAll('script').forEach(oldScript => {
+            const newScript = document.createElement('script');
+            newScript.textContent = oldScript.textContent;
+            document.body.appendChild(newScript);
+            document.body.removeChild(newScript);
+        });
+    })
+    .catch(err => {
+        contentEl.innerHTML = `<div class="alert alert-danger m-3"><strong>❌ Erreur de chargement.</strong><br><small>${err.message}</small></div>`;
+    });
+}
 
         function openAjoutModal() {
             const modalEl   = document.getElementById('modalVehicule');
@@ -807,6 +835,20 @@ try {
                     </div>`;
             });
         }
+    </script>
+
+    <!-- Nettoyage de l'URL après modification -->
+    <script>
+    (function() {
+        if (window.location.search && new URLSearchParams(window.location.search).has('success')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        setTimeout(function() {
+            document.querySelectorAll('.alert-fixed').forEach(function(a) {
+                new bootstrap.Alert(a).close();
+            });
+        }, 5000);
+    })();
     </script>
 </body>
 </html>

@@ -367,7 +367,25 @@ $statuts = $pdo->query("SELECT DISTINCT statutRDV FROM rendezvous WHERE statutRD
       .champ-count-wrap { text-align:left; }
       .top5-bar-wrap { display:none; }
     }
+    /* ── Boutons Export ──────────────────────────────────────────────── */
+    .btn-export-group { display:flex; gap:8px; flex-wrap:wrap; }
+    .btn-export {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:7px 15px; border-radius:8px; border:1px solid;
+      font-family:var(--mono); font-size:.78rem; font-weight:500;
+      cursor:pointer; text-decoration:none; background:transparent;
+      transition:all .2s; white-space:nowrap;
+    }
+    .btn-export-excel { color:#34d399; border-color:rgba(52,211,153,.3); background:rgba(52,211,153,.08); }
+    .btn-export-excel:hover { background:#34d399; color:#0b111e; border-color:#34d399; }
+    .btn-export-pdf   { color:var(--red);  border-color:rgba(239,68,68,.3);  background:rgba(239,68,68,.08); }
+    .btn-export-pdf:hover   { background:var(--red); color:#fff; border-color:var(--red); }
+
   </style>
+
+  <!-- jsPDF + AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body class="ds-init" data-sidebar-size="default">
@@ -567,6 +585,17 @@ $statuts = $pdo->query("SELECT DISTINCT statutRDV FROM rendezvous WHERE statutRD
           <span class="vg-count">
             <span id="visibleCount"><?php echo count($pageVehicules); ?></span> / <?php echo $total; ?>
           </span>
+          <!-- Boutons Export -->
+          <div class="btn-export-group">
+            <button onclick="exportExcel()" class="btn-export btn-export-excel">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              Excel
+            </button>
+            <button onclick="exportPDF()" class="btn-export btn-export-pdf">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              PDF
+            </button>
+          </div>
         </div>
 
         <!-- Table -->
@@ -669,6 +698,7 @@ $statuts = $pdo->query("SELECT DISTINCT statutRDV FROM rendezvous WHERE statutRD
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+// ── Recherche matricule ───────────────────────────────────────────────
 (function(){
   const input  = document.getElementById('searchMatricule');
   const rows   = document.querySelectorAll('#tableBody tr[data-matricule]');
@@ -689,6 +719,90 @@ $statuts = $pdo->query("SELECT DISTINCT statutRDV FROM rendezvous WHERE statutRD
     if(countEl) countEl.textContent   = vis;
   });
 })();
+
+// ── Données injectées par PHP (liste complète) ────────────────────────
+const allVehicules = <?= json_encode(array_map(function($v) {
+    return [
+        $v['marqueV']          ?? '',
+        $v['matriculevoiture'] ?? '',
+        number_format((float)($v['kilometrageV'] ?? 0), 0, ',', ' ') . ' km',
+        $v['date_ajoutV']      ?? '',
+        $v['nomclient']        ?? 'N/A'
+    ];
+}, $listVehicules), JSON_UNESCAPED_UNICODE) ?>;
+
+const HEADERS = ['Marque', 'Matricule', 'Kilométrage', 'Date Ajout', 'Client'];
+
+// ── Export Excel ──────────────────────────────────────────────────────
+function exportExcel() {
+  let html = '<table><thead><tr>' + HEADERS.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+  allVehicules.forEach(r => {
+    html += '<tr>' + r.map(v => `<td>${String(v).replace(/</g,'&lt;')}</td>`).join('') + '</tr>';
+  });
+  html += '</tbody></table>';
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  downloadBlob(blob, 'vehicules.xls');
+}
+
+// ── Export PDF ────────────────────────────────────────────────────────
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  doc.setFillColor(8, 14, 26);
+  doc.rect(0, 0, 297, 210, 'F');
+
+  doc.setFontSize(14);
+  doc.setTextColor(56, 189, 248);
+  doc.text('Gestion du Parc Automobile', 14, 16);
+
+  doc.setFontSize(8);
+  doc.setTextColor(71, 85, 105);
+  doc.text('Exporté le ' + new Date().toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric'}), 14, 22);
+
+  doc.autoTable({
+    head: [HEADERS],
+    body: allVehicules,
+    startY: 27,
+    styles: {
+      fontSize: 8.5,
+      cellPadding: 4,
+      textColor: [226, 232, 240],
+      fillColor: [15, 24, 37],
+      lineColor: [26, 40, 64],
+      lineWidth: 0.3,
+      overflow: 'ellipsize'
+    },
+    headStyles: {
+      fillColor: [11, 18, 32],
+      textColor: [100, 116, 139],
+      fontStyle: 'bold',
+      fontSize: 7.5,
+      halign: 'left'
+    },
+    alternateRowStyles: { fillColor: [17, 28, 45] },
+    columnStyles: {
+      1: { cellWidth: 35 },
+      2: { cellWidth: 32 },
+      3: { cellWidth: 28 }
+    },
+    margin: { left: 14, right: 14 }
+  });
+
+  doc.save('vehicules.pdf');
+}
+
+// ── Helper download ───────────────────────────────────────────────────
+function downloadBlob(blob, filename) {
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href  = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>
