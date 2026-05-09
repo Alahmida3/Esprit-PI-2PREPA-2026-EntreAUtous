@@ -43,7 +43,7 @@ function sortLink($col, $currentSort, $currentOrder, $type) {
         $icon = $currentOrder === 'asc' ? ' ↑' : ' ↓';
     }
     $params = http_build_query(array_merge($_GET, ["sort_{$type}" => $col, "order_{$type}" => $newOrder]));
-    return '<a href="/integration/user/index.php?' . $params . '" style="color:inherit;text-decoration:none;">' . $icon . '</a>';
+    return '<a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?' . $params . '" style="color:inherit;text-decoration:none;">' . $icon . '</a>';
 }
 ?>
 <!DOCTYPE html>
@@ -205,7 +205,7 @@ function sortLink($col, $currentSort, $currentOrder, $type) {
 <!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
 <div class="sidebar">
     <h5><i class="fas fa-cog"></i> Admin Panel</h5>
-    <a href="/integration/user/index.php?action=admin" class="active"></i> Dashboard</a>
+    <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=admin" class="active"></i> Dashboard</a>
     <a href="#stats-section"   onclick="scrollToSection('stats-section')">  <i class="fas fa-chart-line"></i>  Statistiques</a>
     <a href="#pieces-section"  onclick="scrollToSection('pieces-section')"> <i class="fas fa-cogs"></i>         Gestion Pièces</a>
     <a href="#ventes-section"  onclick="scrollToSection('ventes-section')"> <i class="fas fa-chart-bar"></i>    Historique Ventes</a>
@@ -214,10 +214,10 @@ function sortLink($col, $currentSort, $currentOrder, $type) {
     <hr>
     
     <hr>
-    <a href="/integration/user/views/back/admin.php" style="color:#fd7e14;border-left-color:#fd7e14;">
+    <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/views/back/admin.php" style="color:#fd7e14;border-left-color:#fd7e14;">
     <i class="fas fa-tachometer-alt" style="color:#fd7e14;"></i> Admin Principal
 </a>
-<a href="/integration/user/index.php"><i class="fas fa-arrow-left"></i> Retour au Site</a>
+<a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php"><i class="fas fa-arrow-left"></i> Retour au Site</a>
 
 </div>
 
@@ -321,7 +321,7 @@ function sortLink($col, $currentSort, $currentOrder, $type) {
     <!-- ── Formulaire ajout pièce ── -->
     <div class="form-card" id="add-piece-form">
         <h5><i class="fas fa-plus-circle"></i> Ajouter une Nouvelle Pièce</h5>
-        <form method="POST" action="/integration/user/index.php?action=add_piece">
+        <form method="POST" action="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=add_piece">
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Nom de la Pièce *</label>
@@ -397,7 +397,7 @@ function sortLink($col, $currentSort, $currentOrder, $type) {
                             $params = http_build_query(array_merge($_GET, ['sort_piece'=>$col,'order_piece'=>$newOrder,'action'=>'admin']));
                         ?>
                         <th class="sortable <?php echo $isSorted ? 'sorted' : ''; ?>">
-                            <a href="/integration/user/index.php?<?php echo $params; ?>" style="color:inherit;text-decoration:none;">
+                            <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?<?php echo $params; ?>" style="color:inherit;text-decoration:none;">
                                 <?php echo $label; ?> <span class="sort-icon"><?php echo $icon; ?></span>
                             </a>
                         </th>
@@ -424,11 +424,11 @@ function sortLink($col, $currentSort, $currentOrder, $type) {
                                 <a href="#" onclick="editPiece(<?php echo $piece['id_piece']; ?>)" class="btn btn-primary btn-action">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                               <a href="/integration/user/index.php?action=export_pdf_vente&id=<?php echo $piece['id_piece']; ?>"
+                               <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=export_pdf_vente&id=<?php echo $piece['id_piece']; ?>"
                                    class="btn btn-warning btn-action" title="Exporter ventes en PDF" target="_blank">
                                     <i class="fas fa-file-pdf"></i>
                                 </a>
-                                <a href="/integration/user/index.php?action=delete_piece&id=<?php echo $piece['id_piece']; ?>"
+                                <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=delete_piece&id=<?php echo $piece['id_piece']; ?>"
                                    class="btn btn-danger btn-action"
                                    onclick="return confirm('Supprimer cette pièce et toutes ses ventes ?')">
                                     <i class="fas fa-trash"></i>
@@ -515,7 +515,7 @@ function sortLink($col, $currentSort, $currentOrder, $type) {
                             $params = http_build_query(array_merge($_GET, ['sort_vente'=>$col,'order_vente'=>$newOrder,'action'=>'admin']));
                         ?>
                         <th class="sortable <?php echo $isSorted ? 'sorted' : ''; ?>">
-                            <a href="/integration/user/index.php?<?php echo $params; ?>" style="color:inherit;text-decoration:none;">
+                            <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?<?php echo $params; ?>" style="color:inherit;text-decoration:none;">
                                 <?php echo $label; ?> <span class="sort-icon"><?php echo $icon; ?></span>
                             </a>
                         </th>
@@ -538,7 +538,7 @@ function sortLink($col, $currentSort, $currentOrder, $type) {
                             <td>
                                 <a href="#" onclick="editVente(<?php echo $vente['id']; ?>, <?php echo $vente['quantite']; ?>, '<?php echo $vente['date_vente']; ?>')"
                                    class="btn btn-primary btn-action"><i class="fas fa-edit"></i></a>
-                                <a href="/integration/user/index.php?action=delete_vente&id=<?php echo $vente['id']; ?>"
+                                <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=delete_vente&id=<?php echo $vente['id']; ?>"
                                    class="btn btn-danger btn-action"
                                    onclick="return confirm('Supprimer cette vente et restaurer le stock ?')">
                                     <i class="fas fa-trash"></i>
@@ -889,7 +889,7 @@ function editPiece(id) {
     document.getElementById('edit_fourniseur').value     = p.fourniseur || '';
     document.getElementById('edit_image').value          = p.image || '';
     document.getElementById('edit_description').value    = p.description || '';
-   document.getElementById('editForm').action = '/integration/user/index.php?action=edit_piece&id=' + id;
+   document.getElementById('editForm').action = '/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=edit_piece&id=' + id;
     new bootstrap.Modal(document.getElementById('editModal')).show();
 }
 
@@ -901,7 +901,7 @@ function editVente(id, quantite, date_vente) {
     document.getElementById('edit_vente_date').value =
         d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) +
         'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-    document.getElementById('editVenteForm').action = '/integration/user/index.php?action=edit_vente&id=' + id;
+    document.getElementById('editVenteForm').action = '/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=edit_vente&id=' + id;
     new bootstrap.Modal(document.getElementById('editVenteModal')).show();
 }
 </script>

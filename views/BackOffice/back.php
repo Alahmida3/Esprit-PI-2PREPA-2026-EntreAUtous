@@ -360,12 +360,12 @@ if (empty($garages)) {
             <h1>Bonjour, Admin 👋</h1>
          <p style="opacity: 0.9;">Voici la page de gestion des garages.</p>
             <div style="display:flex; gap:10px; margin-top:15px;">
-                <a href="/integration/user/views/FrontOffice/front.php" style="
+                <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/views/FrontOffice/front.php" style="
                     background:white; color:#d4145a; padding:8px 18px;
                     border-radius:8px; text-decoration:none; font-weight:700; font-size:13px;">
                     🔍 Voir les Garages (Front)
                 </a>
-                <a href="/integration/user/views/back/admin.php" style="
+                <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/views/back/admin.php" style="
                     background:rgba(255,255,255,0.2); color:white; padding:8px 18px;
                     border-radius:8px; text-decoration:none; font-weight:700; font-size:13px;">
                      🏠 Retour Accueil
@@ -1060,7 +1060,7 @@ function genererResume(idGarage) {
     document.getElementById('resume-texte').style.display = 'none';
 
     // Appel au fichier resume.php
-    fetch('/integration/user/Controller/resume.php', {
+    fetch('/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/resume.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_garage: idGarage })
@@ -1203,7 +1203,7 @@ function lancerComparaison() {
     document.getElementById('texte-comparaison').innerHTML = '';
     document.getElementById('stats-comparaison').style.display = 'none';
 
-    fetch('/integration/user/Controller/comparaison.php', {
+    fetch('/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/comparaison.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ garage1: g1, garage2: g2 })

@@ -32,7 +32,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav" style="background: #000000;">
     <div class="container">
-        <a class="navbar-brand text-warning" href="/integration/user/index.php">
+        <a class="navbar-brand text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php">
             <i class="fas fa-cogs"></i> Pièces Auto
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,12 +41,12 @@ if (session_status() === PHP_SESSION_NONE) {
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
-                <li class="nav-item"><a class="nav-link text-warning" href="/integration/user/index.php">Produits</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php">Produits</a></li>
                
-                <li class="nav-item"><a class="nav-link text-warning" href="/integration/user/views/front/home.php">Accueil</a></li>
-                <li class="nav-item"><a class="nav-link text-warning" href="/integration/user/index.php?action=team">Team</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/views/front/home.php">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=team">Team</a></li>
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="/integration/user/index.php?action=cart">
+                    <a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=cart">
                         <i class="fas fa-shopping-cart"></i> Panier
                         <?php 
                             if (!empty($_SESSION['cart']) && count($_SESSION['cart']) > 0):

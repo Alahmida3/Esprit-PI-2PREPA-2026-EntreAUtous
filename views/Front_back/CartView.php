@@ -39,7 +39,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav" style="background: #000000;">
     <div class="container">
-        <a class="navbar-brand text-warning" href="/integration/user/index.php">
+        <a class="navbar-brand text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php">
             <i class="fas fa-cogs"></i> Pièces Auto
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,11 +48,11 @@ if (session_status() === PHP_SESSION_NONE) {
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
-                <li class="nav-item"><a class="nav-link text-warning" href="/integration/user/index.php">Produits</a></li>
-                <li class="nav-item"><a class="nav-link text-warning" href="/integration/user/index.php?action=about">About Us</a></li>
-                <li class="nav-item"><a class="nav-link text-warning" href="/integration/user/index.php?action=team">Team</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php">Produits</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=about">About Us</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=team">Team</a></li>
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="/integration/user/index.php?action=cart">
+                    <a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=cart">
                         <i class="fas fa-shopping-cart"></i> Panier
                         <?php 
                             $_SESSION['cart'] = $_SESSION['cart'] ?? [];
@@ -79,7 +79,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 <i class="fas fa-shopping-cart fa-5x text-muted mb-3"></i>
                 <h4>Votre panier est vide</h4>
                 <p class="text-muted">Commencez par ajouter des articles à votre panier</p>
-                <a href="/integration/user/index.php" class="btn btn-primary mt-3">
+                <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php" class="btn btn-primary mt-3">
                     <i class="fas fa-arrow-left"></i> Continuer vos achats
                 </a>
             </div>
@@ -113,7 +113,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             <td><?php echo htmlspecialchars($item['reference']); ?></td>
                                             <td><?php echo number_format($item['prix'], 2); ?> €</td>
                                             <td>
-                                                <form method="POST" action="/integration/user/index.php?action=update_cart" style="display: inline;">
+                                                <form method="POST" action="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=update_cart" style="display: inline;">
                                                     <input type="hidden" name="id_piece" value="<?php echo $item['id_piece']; ?>">
                                                     <div class="input-group" style="width: 120px;">
                                                         <button class="btn btn-sm btn-outline-secondary" type="button" onclick="decreaseQty(this)">−</button>
@@ -124,7 +124,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                             </td>
                                             <td class="price-total"><?php echo number_format($sousTotal, 2); ?> €</td>
                                             <td>
-                                                <form method="POST" action="/integration/user/index.php?action=remove_from_cart" style="display: inline;">
+                                                <form method="POST" action="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=remove_from_cart" style="display: inline;">
                                                     <input type="hidden" name="id_piece" value="<?php echo $item['id_piece']; ?>">
                                                     <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
                                                         <i class="fas fa-trash"></i>
@@ -153,15 +153,15 @@ if (session_status() === PHP_SESSION_NONE) {
                                 <span class="price-total"><?php echo number_format($total, 2); ?> €</span>
                             </div>
                             <hr>
-                            <form method="POST" action="/integration/user/index.php?action=checkout">
+                            <form method="POST" action="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=checkout">
                                 <button type="submit" class="btn btn-success w-100 mb-2">
                                     <i class="fas fa-lock"></i> Procéder au paiement
                                 </button>
                             </form>
-                            <a href="/integration/user/index.php" class="btn btn-outline-secondary w-100 mb-2">
+                            <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php" class="btn btn-outline-secondary w-100 mb-2">
                                 <i class="fas fa-arrow-left"></i> Continuer les achats
                             </a>
-                            <form method="POST" action="/integration/user/index.php?action=clear_cart">
+                            <form method="POST" action="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=clear_cart">
                                 <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('Êtes-vous sûr ?')">
                                     <i class="fas fa-trash"></i> Vider le panier
                                 </button>

@@ -8,14 +8,21 @@ session_set_cookie_params([
     'samesite' => 'Strict'
 ]);
 session_start();
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+
+// ══ GUARD : admin uniquement ══════════════════════════════════
+// Le garagiste a son propre dashboard, on le redirige s'il arrive ici par erreur
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'garagiste'])) {
     header("Location: ../front/login.php");
+    exit();
+}
+if ($_SESSION['role'] === 'garagiste') {
+    header("Location: /Esprit-PI-2PREPA-2026-EntreAUtous/views/back/dashboard_garagiste.php");
     exit();
 }
 
 require_once __DIR__ . '/../../models/db.php';
 
-// ── Action suppression ────────────────────────────────────────
+// ── Action suppression client ─────────────────────────────────
 if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
     $pdo->prepare("DELETE FROM client WHERE id_client = ?")->execute([(int)$_GET['id']]);
     $params = http_build_query(array_filter([
@@ -109,6 +116,17 @@ $statGarages  = 14;
 $statVehicules = 87;
 $statPieces   = 342;
 $statMessages = 21;
+
+// ── Garagistes (pour la section admin) ───────────────────────
+$garagistes  = [];
+$nbGaragistes = 0;
+try {
+    $gStmt    = $pdo->query("SELECT * FROM garagiste ORDER BY date_creation DESC");
+    $garagistes = $gStmt->fetchAll(PDO::FETCH_ASSOC);
+    $nbGaragistes = count($garagistes);
+} catch(PDOException $e) {
+    error_log('[admin.php garagiste] ' . $e->getMessage());
+}
 
 function buildUrl(array $extra = []): string {
     $base = array_filter([
@@ -322,7 +340,30 @@ function sortLink(string $col, string $label): string {
 <?php if (isset($_GET['success'])): ?>
 <div class="toast-notif alert alert-success alert-dismissible shadow" id="toastMsg">
     <i class="ti ti-check me-2"></i>
-    <?= $_GET['success'] === 'deleted' ? 'Client supprimé avec succès.' : 'Opération réussie !' ?>
+    <?php
+    $successMsgs = [
+        'deleted'           => 'Client supprimé avec succès.',
+        'garagiste_added'   => '👨‍🔧 Garagiste ajouté avec succès.',
+        'toggled'           => '🔄 Statut du garagiste mis à jour.',
+        'garagiste_deleted' => '🗑️ Garagiste supprimé.',
+    ];
+    echo $successMsgs[$_GET['success']] ?? 'Opération réussie !';
+    ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<?php endif; ?>
+
+<?php if (isset($_GET['error'])): ?>
+<div class="toast-notif alert alert-danger alert-dismissible shadow" id="toastMsg">
+    <i class="ti ti-alert-circle me-2"></i>
+    <?php
+    $errorMsgs = [
+        'email_exists' => '❌ Cet email garagiste est déjà utilisé.',
+        'invalid_data' => '❌ Données invalides (email ou mot de passe trop court).',
+        'invalid_id'   => '❌ Identifiant garagiste invalide.',
+    ];
+    echo $errorMsgs[$_GET['error']] ?? 'Une erreur est survenue.';
+    ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 <?php endif; ?>
@@ -351,8 +392,7 @@ function sortLink(string $col, string $label): string {
 
             <!-- Module Garages (Rayen) -->
             <div class="nav-section-label">Modules</div>
-            <!-- Module Garages (Rayen) -->
-           <a class="sidebar-link" href="/integration/user/views/BackOffice/back.php">
+            <a class="sidebar-link" href="/Esprit-PI-2PREPA-2026-EntreAUtous/views/BackOffice/back.php">
                 <span class="s-icon"><i class="ti ti-building"></i></span>
                 Garages & Services
                 <span class="sidebar-badge" style="background:#6c63ff;">Rayen</span>
@@ -394,8 +434,7 @@ function sortLink(string $col, string $label): string {
             </a>
             <div class="collapse sidebar-collapse" id="navPieces">
                 <div class="sub-nav">
-                    <a class="sidebar-link" href="/integration/user/index.php?action=admin#fraud-section">Panel Admin</a>
-                    
+                    <a class="sidebar-link" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=admin#fraud-section">Panel Admin</a>
                 </div>
             </div>
 
@@ -424,6 +463,20 @@ function sortLink(string $col, string $label): string {
                     <a class="sidebar-link active" href="admin.php">Liste des clients</a>
                     <a class="sidebar-link" href="#">Inscriptions récentes</a>
                     <a class="sidebar-link" href="#">Activité & Tracking</a>
+                </div>
+            </div>
+
+            <!-- 👨‍🔧 Garagistes (Insaf / Admin) -->
+            <a class="sidebar-link" href="#navGaragistes" data-bs-toggle="collapse" aria-expanded="<?= (($_GET['tab'] ?? '') === 'garagistes') ? 'true' : 'false' ?>">
+                <span class="s-icon">🔧</span>
+                Garagistes
+                <?php if ($nbGaragistes > 0): ?>
+                <span class="ms-auto badge bg-success rounded-pill" style="font-size:9px;"><?= $nbGaragistes ?></span>
+                <?php endif; ?>
+            </a>
+            <div class="collapse sidebar-collapse <?= (($_GET['tab'] ?? '') === 'garagistes') ? 'show' : '' ?>" id="navGaragistes">
+                <div class="sub-nav">
+                    <a class="sidebar-link" href="admin.php?tab=garagistes#section-garagistes">Gérer les garagistes</a>
                 </div>
             </div>
 
@@ -534,12 +587,12 @@ function sortLink(string $col, string $label): string {
             <div class="row g-3 mb-4">
                 <?php
                 $stats = [
-                    ['label'=>'Clients inscrits',     'value'=>$totalClients,  'icon'=>'ti-users',          'color'=>'primary',  'delta'=>'↑ inscrits ce mois'],
-                    ['label'=>'Garages actifs',        'value'=>$statGarages,   'icon'=>'ti-building',       'color'=>'success',  'delta'=>'Partenaires vérifiés'],
-                    ['label'=>'Véhicules référencés',  'value'=>$statVehicules, 'icon'=>'ti-car',            'color'=>'danger',   'delta'=>'Dans l\'inventaire'],
-                    ['label'=>'Pièces en stock',       'value'=>$statPieces,    'icon'=>'ti-shopping-cart',  'color'=>'warning',  'delta'=>'Référencées au catalogue'],
-                    ['label'=>'Messages en attente',   'value'=>$statMessages,  'icon'=>'ti-message-circle', 'color'=>'info',     'delta'=>'À traiter'],
-                    ['label'=>'Visites aujourd\'hui',  'value'=>$visitsToday,   'icon'=>'ti-activity',       'color'=>'secondary','delta'=>'Sessions actives'],
+                    ['label'=>'Clients inscrits',     'value'=>$totalClients,   'icon'=>'ti-users',          'color'=>'primary',  'delta'=>'↑ inscrits ce mois'],
+                    ['label'=>'Garages actifs',        'value'=>$statGarages,    'icon'=>'ti-building',       'color'=>'success',  'delta'=>'Partenaires vérifiés'],
+                    ['label'=>'Véhicules référencés',  'value'=>$statVehicules,  'icon'=>'ti-car',            'color'=>'danger',   'delta'=>'Dans l\'inventaire'],
+                    ['label'=>'Pièces en stock',       'value'=>$statPieces,     'icon'=>'ti-shopping-cart',  'color'=>'warning',  'delta'=>'Référencées au catalogue'],
+                    ['label'=>'Messages en attente',   'value'=>$statMessages,   'icon'=>'ti-message-circle', 'color'=>'info',     'delta'=>'À traiter'],
+                    ['label'=>'Garagistes actifs',     'value'=>$nbGaragistes,   'icon'=>'ti-tools',          'color'=>'secondary','delta'=>'Comptes back-office'],
                 ];
                 foreach ($stats as $s): ?>
                 <div class="col-xl-2 col-md-4 col-sm-6">
@@ -606,7 +659,7 @@ function sortLink(string $col, string $label): string {
             </div>
 
             <!-- ── Tableau Clients ── -->
-            <div class="data-card mb-5">
+            <div class="data-card mb-4">
                 <div class="data-card-header">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                         <h6 class="fw-bold mb-0"><i class="ti ti-users me-2 text-primary"></i>Gestion des Clients</h6>
@@ -778,6 +831,95 @@ function sortLink(string $col, string $label): string {
                 <?php endif; ?>
             </div>
 
+            <!-- ══════════════════════════════════════════════════════
+                 SECTION GARAGISTES — visible admin uniquement
+                 ══════════════════════════════════════════════════════ -->
+            <div class="data-card mb-5" id="section-garagistes">
+                <div class="data-card-header d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">
+                        🔧 Gestion des Garagistes
+                        <span class="badge bg-dark ms-2"><?= $nbGaragistes ?></span>
+                    </h6>
+                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalAddGaragiste">
+                        <i class="ti ti-plus me-1"></i> Ajouter un garagiste
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">#</th>
+                                <th>Nom complet</th>
+                                <th>Email</th>
+                                <th>Statut</th>
+                                <th>Créé le</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($garagistes)): ?>
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="ti ti-tool fs-2 d-block mb-2 opacity-50"></i>
+                                    Aucun garagiste enregistré. Commencez par en ajouter un.
+                                </td>
+                            </tr>
+                            <?php else: foreach ($garagistes as $g): ?>
+                            <tr>
+                                <td class="text-muted small ps-3"><?= $g['id_garagiste'] ?></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                             style="width:32px;height:32px;font-size:.75rem;">
+                                            <?= strtoupper(mb_substr($g['prenom']??'G',0,1).mb_substr($g['nom']??'',0,1)) ?>
+                                        </div>
+                                        <span><?= htmlspecialchars($g['prenom'].' '.$g['nom']) ?></span>
+                                    </div>
+                                </td>
+                                <td><?= htmlspecialchars($g['email']) ?></td>
+                                <td>
+                                    <?php if ($g['actif']): ?>
+                                        <span class="badge bg-success-subtle text-success">✅ Actif</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary-subtle text-secondary">⏸ Désactivé</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="small text-muted"><?= date('d/m/Y', strtotime($g['date_creation'])) ?></td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <!-- Toggle actif/inactif -->
+                                        <form method="POST"
+                                              action="/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/UserController.php"
+                                              class="d-inline">
+                                            <input type="hidden" name="action" value="toggle_garagiste">
+                                            <input type="hidden" name="g_id"   value="<?= $g['id_garagiste'] ?>">
+                                            <button type="submit"
+                                                    class="btn btn-sm <?= $g['actif'] ? 'btn-outline-warning' : 'btn-outline-success' ?>"
+                                                    title="<?= $g['actif'] ? 'Désactiver' : 'Activer' ?>">
+                                                <i class="ti <?= $g['actif'] ? 'ti-player-pause' : 'ti-player-play' ?>"></i>
+                                            </button>
+                                        </form>
+                                        <!-- Supprimer -->
+                                        <form method="POST"
+                                              action="/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/UserController.php"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Supprimer ce garagiste définitivement ?')">
+                                            <input type="hidden" name="action" value="delete_garagiste">
+                                            <input type="hidden" name="g_id"   value="<?= $g['id_garagiste'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div><!-- /page-content -->
     </div><!-- /main-area -->
 </div><!-- /layout-wrapper -->
@@ -794,6 +936,50 @@ function sortLink(string $col, string $label): string {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Garagiste -->
+<div class="modal fade" id="modalAddGaragiste" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/UserController.php">
+                <input type="hidden" name="action" value="add_garagiste">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">🔧 Nouveau Garagiste</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Prénom</label>
+                            <input type="text" name="g_prenom" class="form-control" placeholder="Jean">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Nom</label>
+                            <input type="text" name="g_nom" class="form-control" placeholder="Dupont">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="g_email" class="form-control"
+                                   placeholder="garagiste@autout.tn" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Mot de passe <span class="text-danger">*</span></label>
+                            <input type="password" name="g_pass" class="form-control"
+                                   placeholder="Min. 6 caractères" minlength="6" required>
+                            <div class="form-text">Le garagiste devra utiliser ce mot de passe pour se connecter.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="ti ti-user-plus me-1"></i> Créer le compte
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -893,6 +1079,11 @@ setTimeout(() => {
     const t = document.getElementById('toastMsg');
     if (t) t.style.display = 'none';
 }, 4000);
+
+// ── Ouvrir section garagistes si tab=garagistes ───────────────
+<?php if (($_GET['tab'] ?? '') === 'garagistes'): ?>
+document.getElementById('section-garagistes')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+<?php endif; ?>
 </script>
 </body>
 </html>

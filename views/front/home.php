@@ -1,7 +1,7 @@
 <?php
 session_set_cookie_params([
     'lifetime' => 60 * 60 * 24 * 7,
-    'path' => '/integration/user/',
+    'path' => '/Esprit-PI-2PREPA-2026-EntreAUtous/',
     'secure'   => false,
     'httponly' => true,
     'samesite' => 'Strict'
@@ -94,14 +94,14 @@ $userName   = $isLoggedIn ? $_SESSION['user'] : "";
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item d-flex align-items-center" href="/integration/user/views/FrontOffice/front.php">
+                                <a class="dropdown-item d-flex align-items-center" href="/Esprit-PI-2PREPA-2026-EntreAUtous/views/FrontOffice/front.php">
                                     <span class="icon-wrap bg-success-subtle text-success"><i class="fas fa-building"></i></span>
                                     Garages
                                     <span class="ms-auto badge bg-secondary int-badge">Module Rayen</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item d-flex align-items-center" href="/integration/user/">
+                                <a class="dropdown-item d-flex align-items-center" href="/Esprit-PI-2PREPA-2026-EntreAUtous/">
                                     <span class="icon-wrap bg-warning-subtle text-warning"><i class="fas fa-shopping-cart"></i></span>
                                     Vente de Pièces
                                     <span class="ms-auto badge bg-secondary int-badge">Module Amen </span>
@@ -187,7 +187,7 @@ $userName   = $isLoggedIn ? $_SESSION['user'] : "";
                         </div>
                         <h5 class="fw-bold">Garages & Rendez-vous</h5>
                         <p class="text-muted small">Trouvez les meilleurs garages près de chez vous et réservez votre créneau en ligne.</p>
-                        <a href="/integration/user/views/FrontOffice/front.php" class="btn btn-outline-success btn-sm mt-2">Accéder</a>
+                        <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/views/FrontOffice/front.php" class="btn btn-outline-success btn-sm mt-2">Accéder</a>
                     </div>
                 </div>
 
@@ -198,7 +198,7 @@ $userName   = $isLoggedIn ? $_SESSION['user'] : "";
                         </div>
                         <h5 class="fw-bold">Vente de Pièces</h5>
                         <p class="text-muted small">Achetez vos pièces de rechange certifiées en ligne avec livraison rapide à domicile.</p>
-                        <a href="/integration/user/" class="btn btn-outline-warning btn-sm mt-2">Accéder</a>
+                        <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/" class="btn btn-outline-warning btn-sm mt-2">Accéder</a>
                     </div>
                 </div>
 

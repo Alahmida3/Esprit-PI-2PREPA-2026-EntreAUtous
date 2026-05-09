@@ -313,7 +313,7 @@
 
     <!-- ══ Formulaire caché qui sera soumis au serveur ══
          Il reçoit les données de l'étape 1 + l'image du visage -->
-    <form id="hiddenForm" action="/integration/user/Controller/UserController.php" method="POST" style="display:none">
+    <form id="hiddenForm" action="/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/UserController.php" method="POST" style="display:none">
         <input type="hidden" name="action"       value="register">
         <input type="hidden" name="prenom"       id="h-prenom">
         <input type="hidden" name="nom"          id="h-nom">

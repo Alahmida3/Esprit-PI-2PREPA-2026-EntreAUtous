@@ -124,8 +124,14 @@
         <!-- Alertes serveur -->
         <?php if (isset($_GET['error'])): ?>
         <div class="alert alert-danger py-2 small mb-3">
-            <?php $errors=['failed'=>'Email ou mot de passe incorrect.','face_failed'=>'Reconnaissance faciale échouée. Réessayez.'];
-            echo $errors[$_GET['error']] ?? 'Une erreur est survenue.'; ?>
+            <?php
+            $errors = [
+                'failed'           => 'Email ou mot de passe incorrect.',
+                'face_failed'      => 'Reconnaissance faciale échouée. Réessayez.',
+                'account_disabled' => '⚠️ Ce compte garagiste est désactivé. Contactez l\'administrateur.',
+            ];
+            echo $errors[$_GET['error']] ?? 'Une erreur est survenue.';
+            ?>
         </div>
         <?php endif; ?>
         <?php if (isset($_GET['success']) && $_GET['success']==='registered'): ?>
@@ -151,7 +157,7 @@
 
         <!-- ════ MÉTHODE 1 : Classique ════ -->
         <div id="classicPanel">
-            <form id="loginForm" action="/integration/user/Controller/UserController.php" method="POST"
+            <form id="loginForm" action="/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/UserController.php" method="POST"
                   onsubmit="return validateLogin()">
                 <input type="hidden" name="action" value="login">
 
@@ -445,7 +451,6 @@ function handleServerResponse(action, data) {
 function simulateDemo(action, payload) {
     document.getElementById('scanProgress').style.display = 'none';
     if (action === 'face_login') {
-        // Vérifier si un visage est stocké localement (localStorage démo)
         const stored = localStorage.getItem('faceId_demo');
         if (stored) {
             setStatus('success', '✅ [DÉMO] Visage reconnu !');
@@ -455,10 +460,9 @@ function simulateDemo(action, payload) {
             showResult('error', '❌ [DÉMO] Enregistrez d\'abord votre visage via l\'onglet "Enregistrer mon visage".');
         }
     } else {
-        // Enregistrement démo local
         localStorage.setItem('faceId_demo', payload.email + ':' + Date.now());
         setStatus('success', '✅ [DÉMO] Visage capturé localement !');
-        showResult('success', '✅ [DÉMO] Capture réussie. <br><small class="opacity-75">En production, l\'image serait envoyée à votre serveur Python/PHP avec un modèle de reconnaissance (DeepFace / face_recognition).</small>');
+        showResult('success', '✅ [DÉMO] Capture réussie. <br><small class="opacity-75">En production, l\'image serait envoyée à votre serveur PHP avec un modèle de reconnaissance.</small>');
         updateEnrollSteps(4);
     }
     document.getElementById('btnFaceAction').disabled = false;

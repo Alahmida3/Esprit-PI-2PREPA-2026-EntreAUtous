@@ -46,11 +46,11 @@ if (session_status() === PHP_SESSION_NONE) {
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
-                <li class="nav-item"><a class="nav-link text-warning" href="/integration/user/index.php">Produits</a></li>
-                <li class="nav-item"><a class="nav-link text-warning" href="/integration/user/index.php?action=about">About Us</a></li>
-                <li class="nav-item"><a class="nav-link text-warning" href="/integration/user/index.php?action=team">Team</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php">Produits</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=about">About Us</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=team">Team</a></li>
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="/integration/user/index.php?action=cart">
+                    <a class="nav-link text-warning" href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=cart">
                         <i class="fas fa-shopping-cart"></i> Panier
                         <?php 
                             $_SESSION['cart'] = $_SESSION['cart'] ?? [];
@@ -78,7 +78,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     Votre commande a été enregistrée dans notre système et le stock a été mis à jour.
                 </p>
                 <div class="mt-4">
-                    <a href="/integration/user/index.php" class="btn btn-primary btn-lg">
+                    <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php" class="btn btn-primary btn-lg">
                         <i class="fas fa-shopping-bag"></i> Continuer vos Achats
                     </a>
                 </div>
@@ -91,10 +91,10 @@ if (session_status() === PHP_SESSION_NONE) {
                     <?php echo htmlspecialchars($_SESSION['payment_message'] ?? 'Une erreur est survenue'); ?>
                 </p>
                 <div class="mt-4">
-                    <a href="/integration/user/index.php?action=cart" class="btn btn-warning btn-lg">
+                    <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php?action=cart" class="btn btn-warning btn-lg">
                         <i class="fas fa-arrow-left"></i> Retour au Panier
                     </a>
-                    <a href="/integration/user/index.php" class="btn btn-secondary btn-lg ms-2">
+                    <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/index.php" class="btn btn-secondary btn-lg ms-2">
                         <i class="fas fa-home"></i> Accueil
                     </a>
                 </div>

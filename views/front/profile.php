@@ -1,7 +1,7 @@
 <?php
 session_set_cookie_params([
     'lifetime' => 60 * 60 * 24 * 7,
-    'path' => '/integration/user/',
+    'path' => '/Esprit-PI-2PREPA-2026-EntreAUtous/',
     'secure'   => false,
     'httponly' => true,
     'samesite' => 'Strict'
@@ -125,7 +125,7 @@ try {
                 <a class="btn btn-outline-light btn-sm" href="home.php">
                     <i class="fas fa-home me-1"></i> Accueil
                 </a>
-                <a class="btn btn-danger btn-sm"  href="/integration/user/Controller/UserController.php?action=logout">
+                <a class="btn btn-danger btn-sm"  href="/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/UserController.php?action=logout">
                     <i class="fas fa-sign-out-alt me-1"></i> Déconnexion
                 </a>
             </div>
@@ -198,7 +198,7 @@ try {
 
                             <!-- Formulaire édition -->
                             <div id="editMode" class="edit-mode">
-                                <form id="formUpdate" action="/integration/user/Controller/UserController.php" method="POST"
+                                <form id="formUpdate" action="/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/UserController.php" method="POST"
                                       onsubmit="return validateUpdate()">
                                     <input type="hidden" name="action" value="update_profile">
                                     <div class="mb-3">
@@ -274,7 +274,7 @@ try {
                             <h5 class="fw-bold mb-1"><i class="fas fa-key me-2 text-primary"></i>Changer le mot de passe</h5>
                             <p class="text-muted small mb-4">Choisissez un mot de passe sécurisé d'au moins 6 caractères.</p>
 
-                            <form id="formPassword" action="/integration/user/Controller/UserController.php" method="POST"
+                            <form id="formPassword" action="/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/UserController.php" method="POST"
                                   onsubmit="return validatePassword()">
                                 <input type="hidden" name="action" value="change_password">
 
@@ -587,7 +587,7 @@ try {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <a href="/integration/user/Controller/UserController.php?action=delete_account"
+                    <a href="/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/UserController.php?action=delete_account"
                        class="btn btn-danger">
                         <i class="fas fa-trash me-1"></i> Oui, supprimer
                     </a>
@@ -715,7 +715,7 @@ try {
 
     // ── Parcours : marquer une étape ─────────────────────────
     function markJStep(key) {
-        fetch('/integration/user/Controller/JourneyController.php', {
+        fetch('/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/JourneyController.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'mark_step', step: key })
@@ -727,7 +727,7 @@ try {
 
     function jResetProfile() {
         if (!confirm('Réinitialiser le parcours ?')) return;
-        fetch('/integration/user/Controller/JourneyController.php', {
+        fetch('/Esprit-PI-2PREPA-2026-EntreAUtous/Controller/JourneyController.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'reset' })
