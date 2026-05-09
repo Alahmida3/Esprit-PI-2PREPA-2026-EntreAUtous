@@ -55,7 +55,7 @@ $prompt = "Tu es un expert en mécanique automobile. Un client décrit son probl
 // ── 5. Clé API Groq ───────────────────────────────────────────────────────────
 // Stockez votre clé dans une variable d'environnement serveur (recommandé)
 // ex: SetEnv GROQ_API_KEY gsk_xxxxxxxxxxxx  dans .htaccess ou vhost
-$apiKey = "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";
+$apiKey = "";
 
 if (empty($apiKey)) {
     jsonError('Clé API non configurée. Contactez l\'administrateur.', 500);
