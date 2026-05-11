@@ -158,33 +158,37 @@ class EntretienController {
     }
 
    
-    public function getListeFront(int $page = 1, int $parPage = 6): array
-    {
-        $tous = Entretien::findAll($this->pdo);
-        $total = count($tous);
-        $totalPages = max(1, (int)ceil($total / $parPage));
-        $page = max(1, min($page, $totalPages));
-        $offset = ($page - 1) * $parPage;
-        $list = array_slice($tous, $offset, $parPage);
+    public function getListeFront(int $page = 1, int $parPage = 6, int $clientId = 0): array
+{
+    // On utilise la méthode filtrée par client au lieu de findAll()
+    $tous = Entretien::findByClient($this->pdo, $clientId);
+    
+    $total = count($tous);
+    $totalPages = max(1, (int)ceil($total / $parPage));
+    $page = max(1, min($page, $totalPages));
+    $offset = ($page - 1) * $parPage;
+    $list = array_slice($tous, $offset, $parPage);
 
-        $facturesCarte = [];
-        if (!empty($list)) {
-            $ids = array_column($list, 'id_entretien');
-            $placeholders = implode(',', array_fill(0, count($ids), '?'));
-            $stmt = $this->pdo->prepare(
-                "SELECT entretien FROM facture
-                 WHERE entretien IN ($placeholders)
-                   AND mode_paiement = 'Carte Bancaire'
-                   AND deleted_at IS NULL"
-            );
-            $stmt->execute($ids);
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $facturesCarte[$row['entretien']] = true;
-            }
+    $facturesCarte = [];
+    if (!empty($list)) {
+        $ids = array_column($list, 'id_entretien');
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        
+        // On garde la logique de vérification des paiements par carte
+        $stmt = $this->pdo->prepare(
+            "SELECT entretien FROM facture 
+             WHERE entretien IN ($placeholders) 
+               AND mode_paiement = 'Carte Bancaire' 
+               AND deleted_at IS NULL"
+        );
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $facturesCarte[$row['entretien']] = true;
         }
-
-        return compact('list', 'facturesCarte', 'page', 'totalPages', 'total');
     }
+
+    return compact('list', 'facturesCarte', 'page', 'totalPages', 'total');
+}
 
     // ── Vue BACK : listeentretiens.php ─────────────────────────
 

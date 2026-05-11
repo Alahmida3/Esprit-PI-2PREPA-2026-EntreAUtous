@@ -1,12 +1,7 @@
 <?php
-/**
- * banque_secure.php — VUE UNIQUEMENT
- * ─────────────────────────────────────────────────────────────
- * Responsabilité : afficher la page de paiement.
- * - Aucune validation de carte ici.
- * - Aucun UPDATE BDD ici.
- * - La logique métier est dans PaiementController + paiement_action.php.
- */
+session_start();
+$clientId = $_SESSION['user_id'] ?? 0;
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -21,8 +16,7 @@ if ($idEntretien <= 0) {
 }
 
 $ctrl      = new PaiementController($pdo);
-$entretien = $ctrl->getPaymentData($idEntretien);
-
+$entretien = $ctrl->getPaymentData($idEntretien, $clientId);
 if (!$entretien) {
     header('Location: liste_entretien.php?paiement_err=1');
     exit;

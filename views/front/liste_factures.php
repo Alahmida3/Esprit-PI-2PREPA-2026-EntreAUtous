@@ -1,10 +1,15 @@
 <?php
 /* VUE UNIQUEMENT — aucun SQL, aucune logique métier */
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+session_start();
 require_once __DIR__ . '/../../models/db.php';
 require_once __DIR__ . '/../../Controller/FactureController.php';
+$clientId = $_SESSION['user_id'] ?? 0;
 
 $ctrl = new FactureController($pdo);
 $data = $ctrl->getListeFront(
+    clientId:    $clientId, // On passe l'ID client en premier paramètre
     entretienId: isset($_GET['entretien']) ? (int)$_GET['entretien'] : null,
     searchRef:   trim($_GET['ref']  ?? ''),
     searchDate:  trim($_GET['date'] ?? ''),

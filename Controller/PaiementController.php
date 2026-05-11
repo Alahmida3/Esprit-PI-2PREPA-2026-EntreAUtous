@@ -65,76 +65,64 @@ class PaiementController
     }
 
    
-    public function getPaymentData(int $idEntretien): ?array
-    {
-        $stmt = $this->pdo->prepare("
-            SELECT e.id_entretien, e.Matricule, e.type_intervention, e.statut,
-                   v.marqueV,
-                   f.ref_facture, f.montant_ttc, f.taux_tva, f.mode_paiement
+   public function getPaymentData($idEntretien, $clientId) {
+    // Vérifie bien que idclient et matriculevoiture sont les noms dans ta BDD
+    $sql = "SELECT e.*, f.montant_ttc, f.ref_facture, v.marqueV 
             FROM entre e
-            JOIN vehicule v ON e.Matricule = v.matriculevoiture
-            INNER JOIN facture f ON f.entretien = e.id_entretien
-                                AND f.mode_paiement = 'Carte Bancaire'
-                                AND f.deleted_at IS NULL
-            WHERE e.id_entretien = ? AND e.deleted_at IS NULL
-            LIMIT 1
-        ");
-        $stmt->execute([$idEntretien]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$row || $row['statut'] !== 'termine') {
-            return null;
-        }
-
-        return $row;
-    }
-
+            INNER JOIN facture f ON e.id_entretien = f.entretien
+            INNER JOIN vehicule v ON e.Matricule = v.matriculevoiture 
+            WHERE e.id_entretien = ? 
+              AND v.idclient = ? 
+              AND f.mode_paiement = 'Carte Bancaire'
+              AND e.deleted_at IS NULL";
+              
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->execute([(int)$idEntretien, (int)$clientId]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
     /**
      * Traite le paiement : valide la carte, puis met à jour le statut
      * de l'entretien en 'paye' et de la facture en 'Payée'.
      * @return array ['success'=>bool, 'error'=>string|null]
      */
-    public function processPayment(int $idEntretien, array $cardData): array
-    {
-        // 1. Valider la carte
-        $validation = $this->validateCardData($cardData);
-        if (!$validation['success']) {
-            return $validation;
-        }
+    public function processPayment($idEntretien, $cardData, $clientId) {
+    // 1. Valider la carte (Luhn, etc.)
+    $val = $this->validateCardData($cardData);
+    if (!$val['success']) return $val;
 
-        // 2. Vérifier que l'entretien est bien dans l'état attendu
-        $entretien = $this->getPaymentData($idEntretien);
-        if (!$entretien) {
-            return ['success' => false, 'error' => "Entretien invalide ou non éligible au paiement."];
-        }
-
-        try {
-            $this->pdo->beginTransaction();
-
-            // 3. Mettre à jour le statut de l'entretien → 'paye'
-            $stmtEnt = $this->pdo->prepare(
-                "UPDATE entre SET statut = 'paye' WHERE id_entretien = ? AND deleted_at IS NULL"
-            );
-            $stmtEnt->execute([$idEntretien]);
-
-            // 4. Mettre à jour l'état de la facture → 'Payée'
-            $stmtFac = $this->pdo->prepare(
-                "UPDATE facture
-                 SET etat_paiement = 'Payée'
-                 WHERE entretien = ?
-                   AND mode_paiement = 'Carte Bancaire'
-                   AND deleted_at IS NULL"
-            );
-            $stmtFac->execute([$idEntretien]);
-
-            $this->pdo->commit();
-            return ['success' => true, 'error' => null];
-
-        } catch (Exception $e) {
-            $this->pdo->rollBack();
-            return ['success' => false, 'error' => 'Erreur lors du traitement du paiement.'];
-        }
+    // 2. Vérifier la propriété (Sécurité : est-ce que cet entretien appartient au client ?)
+    $entretien = $this->getPaymentData($idEntretien, $clientId);
+    if (!$entretien) {
+        return ['success' => false, 'error' => "Entretien invalide ou accès refusé."];
     }
+
+    try {
+        $this->pdo->beginTransaction();
+
+        // 3. Statut -> 'paye'
+        $stmtEnt = $this->pdo->prepare(
+            "UPDATE entre SET statut = 'paye' WHERE id_entretien = ? AND deleted_at IS NULL"
+        );
+        $stmtEnt->execute([$idEntretien]);
+
+        // 4. Etat facture -> 'Payée'
+        $stmtFac = $this->pdo->prepare(
+            "UPDATE facture
+             SET etat_paiement = 'Payée'
+             WHERE entretien = ?
+               AND mode_paiement = 'Carte Bancaire'
+               AND deleted_at IS NULL"
+        );
+        $stmtFac->execute([$idEntretien]);
+
+        $this->pdo->commit();
+        return ['success' => true, 'error' => null];
+
+    } catch (Exception $e) {
+        $this->pdo->rollBack();
+        return ['success' => false, 'error' => 'Erreur lors du traitement du paiement.'];
+    }
+}
 
     // ── Algorithme de Luhn (vérification numéro de carte) ─────
 

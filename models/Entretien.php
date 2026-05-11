@@ -160,6 +160,15 @@ class Entretien {
         $counts['total'] = $total;
         return $counts;
     }
+    public static function findByClient($pdo, $clientId) {
+    $sql = "SELECT e.* FROM entre e 
+            INNER JOIN vehicule v ON e.Matricule = v.matriculevoiture
+            WHERE v.idclient = ? AND e.deleted_at IS NULL 
+            ORDER BY e.date_entretien DESC";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([(int)$clientId]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
     
     
 }

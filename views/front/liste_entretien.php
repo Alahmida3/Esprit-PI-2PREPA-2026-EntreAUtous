@@ -1,10 +1,13 @@
 <?php
 /* VUE UNIQUEMENT — aucun SQL, aucune logique métier */
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+session_start();
 require_once __DIR__ . '/../../models/db.php';
 require_once __DIR__ . '/../../Controller/EntretienController.php';
-
+$clientId = $_SESSION['user_id'] ?? 0;
 $ctrl = new EntretienController($pdo);
-$data = $ctrl->getListeFront((int)($_GET['page'] ?? 1), 6);
+$data = $ctrl->getListeFront((int)($_GET['page'] ?? 1), 6, $clientId);
 
 // Variables prêtes à l'affichage
 $list          = $data['list'];

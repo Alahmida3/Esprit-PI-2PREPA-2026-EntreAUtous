@@ -172,5 +172,36 @@ class Facture {
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+   public static function findFiltreeFrontByClient($pdo, $clientId, $searchRef = '', $searchDate = '', $sort = 'recent') {
+    $sql = "SELECT f.* FROM facture f
+            INNER JOIN entre e ON f.entretien = e.id_entretien
+            INNER JOIN vehicule v ON e.Matricule = v.matriculevoiture
+            WHERE v.idclient = ? 
+              AND f.deleted_at IS NULL 
+              AND e.deleted_at IS NULL";
+    
+    $params = [(int)$clientId];
+
+    if ($searchRef !== '') {
+        $sql .= " AND f.ref_facture LIKE ?";
+        $params[] = '%' . $searchRef . '%';
+    }
+    if ($searchDate !== '') {
+        $sql .= " AND f.date_emission = ?";
+        $params[] = $searchDate;
+    }
+
+    // Gestion du tri
+    switch ($sort) {
+        case 'price-asc':  $sql .= " ORDER BY f.montant_ttc ASC";  break;
+        case 'price-desc': $sql .= " ORDER BY f.montant_ttc DESC"; break;
+        default:           $sql .= " ORDER BY f.date_emission DESC"; break;
+    }
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
 ?>

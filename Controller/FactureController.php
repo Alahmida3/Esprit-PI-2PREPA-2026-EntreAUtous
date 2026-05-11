@@ -123,26 +123,34 @@ class FactureController {
      * @param int      $parPage      Factures par page
      * @return array [factures, page, totalPages, total, searchRef, searchDate, sort, entretienId]
      */
-    public function getListeFront(
-        ?int   $entretienId = null,
-        string $searchRef   = '',
-        string $searchDate  = '',
-        string $sort        = 'recent',
-        int    $page        = 1,
-        int    $parPage     = 4
-    ): array {
-        
-        $toutes = Facture::findFiltreeFront($this->pdo, $entretienId, $searchRef, $searchDate, $sort);
+   public function getListeFront(
+    int    $clientId, // Ajout du paramètre obligatoire
+    ?int   $entretienId = null,
+    string $searchRef   = '',
+    string $searchDate  = '',
+    string $sort        = 'recent',
+    int    $page        = 1,
+    int    $parPage     = 4
+): array {
+    
+    // On utilise la nouvelle méthode qui filtre par Client ET par les autres critères
+    $toutes = Facture::findFiltreeFrontByClient(
+        $this->pdo, 
+        $clientId, 
+        $searchRef, 
+        $searchDate, 
+        $sort
+    );
 
-        // 2. Pagination PHP (les données sont déjà filtrées/triées par SQL)
-        $total      = count($toutes);
-        $totalPages = max(1, (int)ceil($total / $parPage));
-        $page       = max(1, min($page, $totalPages));
-        $offset     = ($page - 1) * $parPage;
-        $factures   = array_slice($toutes, $offset, $parPage);
+    // 2. Pagination PHP
+    $total      = count($toutes);
+    $totalPages = max(1, (int)ceil($total / $parPage));
+    $page       = max(1, min($page, $totalPages));
+    $offset     = ($page - 1) * $parPage;
+    $factures   = array_slice($toutes, $offset, $parPage);
 
-        return compact('factures', 'page', 'totalPages', 'total', 'searchRef', 'searchDate', 'sort', 'entretienId');
-    }
+    return compact('factures', 'page', 'totalPages', 'total', 'searchRef', 'searchDate', 'sort', 'entretienId');
+}
 
    
     public function exportToPDF($id) {
