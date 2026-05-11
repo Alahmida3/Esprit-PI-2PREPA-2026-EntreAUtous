@@ -42,8 +42,8 @@ $steps = [
     ['key'=>'step_profile',  'icon'=>'👤', 'label'=>'Compléter le profil',   'tip'=>'Ajoutez votre téléphone et adresse.',     'url'=>'profile.php',    'color'=>'#6366f1'],
     ['key'=>'step_diagnostic','icon'=>'🔍', 'label'=>'Explorer les services',  'tip'=>'Visitez la section Services.',            'url'=>'#services',      'color'=>'#3b82f6'],
     ['key'=>'step_garage', 'icon'=>'🏢', 'label'=>'Consulter un garage', 'tip'=>'Découvrez nos garages partenaires.', 'url'=>'/Esprit-PI-2PREPA-2026-EntreAUtous/views/FrontOffice/front.php', 'color'=>'#10b981'],
-    ['key'=>'step_vehicle',  'icon'=>'🚗', 'label'=>'Ajouter un véhicule',    'tip'=>'Enregistrez votre voiture.',              'url'=>'#',              'color'=>'#f59e0b'],
-    ['key'=>'step_rdv',      'icon'=>'📅', 'label'=>'Prendre rendez-vous',    'tip'=>'Réservez un créneau en ligne.',           'url'=>'#',              'color'=>'#ef4444'],
+    ['key'=>'step_vehicle',  'icon'=>'🚗', 'label'=>'Ajouter un véhicule',    'tip'=>'Enregistrez votre voiture.',              'url'=>'GestionVehicule.php',              'color'=>'#f59e0b'],
+    ['key'=>'step_rdv',      'icon'=>'📅', 'label'=>'Prendre rendez-vous',    'tip'=>'Réservez un créneau en ligne.',           'url'=>'GestionVehicule.php',              'color'=>'#ef4444'],
     ['key'=>'step_message',  'icon'=>'✉️', 'label'=>'Envoyer un message',     'tip'=>'Contactez un technicien directement.',   'url'=>'#',              'color'=>'#8b5cf6'],
 ];
 
@@ -241,7 +241,7 @@ function jStepClick(key, url) {
     if (window.AT_Tracker) {
         AT_Tracker.markStep(key, function(data) { if (data && data.journey) jUpdateUI(data.journey); });
     } else {
-        fetch('/autout/controller/JourneyController.php', {
+        fetch('/Esprit-PI-2PREPA-2026-EntreAUtous/controller/JourneyController.php', {
             method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({action:'mark_step', step:key})
         }).then(function(r){return r.json();}).then(function(d){ if(d.journey) jUpdateUI(d.journey); }).catch(function(){});
@@ -252,7 +252,7 @@ function jStepClick(key, url) {
 // ── Réinitialiser ─────────────────────────────────────────────
 function jReset() {
     if (!confirm('Réinitialiser le parcours ?')) return;
-    fetch('/autout/controller/JourneyController.php', {
+    fetch('/Esprit-PI-2PREPA-2026-EntreAUtous/controller/JourneyController.php', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({action:'reset'})
     }).then(function(){location.reload();}).catch(function(){location.reload();});

@@ -108,7 +108,7 @@ $userName   = $isLoggedIn ? $_SESSION['user'] : "";
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                <a class="dropdown-item d-flex align-items-center" href="GestionVehicule.php">
                                     <span class="icon-wrap bg-danger-subtle text-danger"><i class="fas fa-car"></i></span>
                                     Véhicules
                                     <span class="ms-auto badge bg-secondary int-badge">Module Ela</span>
@@ -209,7 +209,7 @@ $userName   = $isLoggedIn ? $_SESSION['user'] : "";
                         </div>
                         <h5 class="fw-bold">Gestion Véhicules</h5>
                         <p class="text-muted small">Gérez votre parc automobile, consultez les fiches techniques et l'historique de vos véhicules.</p>
-                        <a href="#" class="btn btn-outline-danger btn-sm mt-2">Accéder</a>
+                        <a href="GestionVehicule.php" class="btn btn-outline-danger btn-sm mt-2">Accéder</a>
                     </div>
                 </div>
 

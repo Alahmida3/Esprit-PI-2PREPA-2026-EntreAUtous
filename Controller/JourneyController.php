@@ -2,7 +2,7 @@
 // controller/JourneyController.php
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
-session_set_cookie_params(['lifetime'=>60*60*24*7,'path'=>'/autout/','secure'=>false,'httponly'=>true,'samesite'=>'Strict']);
+session_set_cookie_params(['lifetime'=>60*60*24*7,'path'=>'/Esprit-PI-2PREPA-2026-EntreAUtous/','secure'=>false,'httponly'=>true,'samesite'=>'Strict']);
 session_start();
 if (!isset($_SESSION['user_id'])) { echo json_encode(['success'=>false,'message'=>'Non authentifié']); exit(); }
 require_once __DIR__ . '/../models/db.php';

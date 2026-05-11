@@ -1,7 +1,7 @@
 <?php
 // models/db.php
 $host   = 'localhost';
-$dbname = 'gestion_vente';
+$dbname = 'integration';
 $user   = 'root';
 $password = '';
 
@@ -19,5 +19,15 @@ class connexion {
     public function __construct() {
         global $pdo;
         $this->conx = $pdo;
+    }
+}
+
+
+// Classe config : ajoutée pour compatibilité avec les controllers/vues
+// L'ancien code n'est pas modifié.
+class config {
+    public static function getConnexion() {
+        global $pdo;
+        return $pdo;
     }
 }

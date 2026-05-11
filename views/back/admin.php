@@ -2,7 +2,7 @@
 // views/back/admin.php
 session_set_cookie_params([
     'lifetime' => 60 * 60 * 24 * 7,
-    'path'     => '/autout/',
+    'path'     => '/Esprit-PI-2PREPA-2026-EntreAUtous/',
     'secure'   => false,
     'httponly' => true,
     'samesite' => 'Strict'
@@ -406,9 +406,8 @@ function sortLink(string $col, string $label): string {
             </a>
             <div class="collapse sidebar-collapse" id="navVehicules">
                 <div class="sub-nav">
-                    <a class="sidebar-link" href="#">Inventaire</a>
-                    <a class="sidebar-link" href="#">Ajouter un véhicule</a>
-                    <a class="sidebar-link" href="#">Marques & Modèles</a>
+                    <a class="sidebar-link" href="Gestion_voitureBackend.php">Gestion des véhicules</a>
+                    <a class="sidebar-link" href="Gestion_rendezVousBackend.php">Gestion des rendez-vous</a>
                 </div>
             </div>
 
@@ -501,7 +500,7 @@ function sortLink(string $col, string $label): string {
                     <div class="admin-name">Administrateur</div>
                     <div class="admin-role"><?= htmlspecialchars($_SESSION['email'] ?? 'admin@autout.tn') ?></div>
                 </div>
-                <a class="logout-btn" href="/autout/controller/UserController.php?action=logout" title="Déconnexion">
+                <a class="logout-btn" href="/Esprit-PI-2PREPA-2026-EntreAUtous/controller/UserController.php?action=logout" title="Déconnexion">
                     <i class="ti ti-logout"></i>
                 </a>
             </div>

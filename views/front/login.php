@@ -415,7 +415,7 @@ function captureAndEnroll() {
 // ════════════════════════════════════════════════════════════════
 async function sendToServer(action, payload) {
     try {
-        const res  = await fetch('/autout/controller/FaceController.php', {
+        const res  = await fetch('/Esprit-PI-2PREPA-2026-EntreAUtous/controller/FaceController.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ action, ...payload }),
@@ -434,7 +434,7 @@ function handleServerResponse(action, data) {
         if (action === 'face_login') {
             setStatus('success', '✅ Visage reconnu ! Connexion…');
             showResult('success', '✅ Connexion réussie ! Redirection…');
-            setTimeout(() => { window.location.href = data.redirect || '/autout/views/front/home.php'; }, 1200);
+            setTimeout(() => { window.location.href = data.redirect || '/Esprit-PI-2PREPA-2026-EntreAUtous/views/front/home.php'; }, 1200);
         } else {
             setStatus('success', '✅ Visage enregistré avec succès !');
             showResult('success', '✅ ' + (data.message || 'Visage enregistré ! Vous pouvez maintenant vous connecter avec Face ID.'));

@@ -12,7 +12,7 @@ header('X-Content-Type-Options: nosniff');
 
 session_set_cookie_params([
     'lifetime' => 60 * 60 * 24 * 7,
-    'path'     => '/autout/',
+    'path'     => '/Esprit-PI-2PREPA-2026-EntreAUtous/',
     'secure'   => false,
     'httponly' => true,
     'samesite' => 'Strict'
@@ -179,7 +179,7 @@ function faceLogin($pdo, $body) {
         echo json_encode([
             'success'  => true,
             'message'  => 'Visage reconnu ! Bienvenue ' . $user['prenom'] . ' !',
-            'redirect' => '/autout/views/front/home.php',
+            'redirect' => '/Esprit-PI-2PREPA-2026-EntreAUtous/views/front/home.php',
             'score'    => $bestScore,
         ]);
     } else {
