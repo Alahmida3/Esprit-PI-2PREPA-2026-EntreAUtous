@@ -2,7 +2,7 @@
 session_start();
 //var_dump($_SESSION); die();
 require_once(__DIR__ . '/../../models/db.php');
-require_once(__DIR__ . '/../../Controller/Vehicule.php');
+require_once(__DIR__ . '/../../controller/Vehicule.php');
 require_once(__DIR__ . '/../../Controller/RendezVous.php');
 
 $message     = '';
@@ -337,8 +337,14 @@ try {
 <head>
     <?php include_once __DIR__ . '/../../partials/head/head-meta.html'; ?>
     <title>Gestion des Véhicules - Smart Supply</title>
-    <?php include_once __DIR__ . '/../../partials/head/head-links.html'; ?>
-    <link href="/ProjetWeb/assets/Front office/css/styles.css" rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&display=swap" />
+    <!-- Custom CSS -->
+    <link href="../../assets/front/css/styles.css" rel="stylesheet" />
     <style>
         .modal-header-custom { border-bottom:none; text-align:center; display:block; padding-top:2rem; }
         .modal-title-custom  { color:#FFC107; font-weight:bold; text-transform:uppercase; letter-spacing:1px; }
@@ -401,7 +407,7 @@ try {
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark" id="mainNav">
         <div class="container">
             <a class="navbar-brand" href="#page-top">
-                <img src="../assets/Front office/assets/img/navbar-logo.svg" alt="Logo" />
+                <img src="../../assets/front/img/navbar-logo.svg" alt="Logo" />
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive">
                 Menu <i class="fas fa-bars ms-1"></i>
@@ -695,7 +701,7 @@ try {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script src="../assets/Front office/js/scripts.js"></script>
+    <script src="../../assets/front/js/scripts.js"></script>
     <script>
         //Modification du RDV
 function openEditRDVModal(idRDV) {

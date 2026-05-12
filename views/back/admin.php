@@ -431,18 +431,11 @@ function sortLink(string $col, string $label): string {
             </div>
 
             <!-- Module Messagerie (Mohamed) -->
-            <a class="sidebar-link" href="#navMsg" data-bs-toggle="collapse" aria-expanded="false">
-                <span class="s-icon"><i class="ti ti-message-circle"></i></span>
+             <a class="sidebar-link" href="/Esprit-PI-2PREPA-2026-EntreAUtous/views/back/back.php">
+                <span class="s-icon"><i class="ti ti-tools"></i></span>
                 Messagerie
-                <span class="s-badge bg-primary-subtle text-primary">Mohamed</span>
-                <span class="ms-1 badge bg-danger rounded-pill" style="font-size:9px;padding:2px 5px;"><?= $statMessages ?></span>
+                <span class="s-badge bg-info-subtle text-info">med</span>
             </a>
-            <div class="collapse sidebar-collapse" id="navMsg">
-                <div class="sub-nav">
-                    <a class="sidebar-link" href="#">Conversations</a>
-                    <a class="sidebar-link" href="#">Messages signalés</a>
-                </div>
-            </div>
 
             <!-- Module Clients (Insaf) -->
             <a class="sidebar-link" href="#navClients" data-bs-toggle="collapse" aria-expanded="false">

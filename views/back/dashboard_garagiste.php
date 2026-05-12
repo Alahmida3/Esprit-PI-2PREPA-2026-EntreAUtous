@@ -76,23 +76,9 @@ $email  = htmlspecialchars($_SESSION['email']  ?? '');
     </a>
     <!-- Ajoutez ici les liens vers les modules du garagiste au fur et à mesure -->
     <!-- Exemple : rendez-vous, diagnostics, stock, etc. -->
-    <a class="sidebar-link" href="#">
-      📅 Rendez-vous
-    </a>
-    <a class="sidebar-link" href="#">
-      🔩 Diagnostics
-    </a>
-    <a class="sidebar-link" href="#">
-      📦 Stock pièces
-    </a>
-    <a class="sidebar-link" href="#">
+
+    <a class="sidebar-link" href="/Esprit-PI-2PREPA-2026-EntreAUtous/views/back/back.php">
       💬 Messagerie
-    </a>
-    <a class="sidebar-link" href="#">
-      🚗 Véhicules
-    </a>
-    <a class="sidebar-link" href="#">
-      👥 Clients
     </a>
   </nav>
   <div class="sidebar-footer d-flex align-items-center gap-2">

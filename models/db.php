@@ -1,10 +1,10 @@
 <?php
 // models/db.php
 $host     = '127.0.0.1';
-$port     = '3307';
+$port     = '3306';
 $dbname   = 'integration';
 $user     = 'root';
-$password = 'root';
+$password = '';
 
 try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $user, $password);

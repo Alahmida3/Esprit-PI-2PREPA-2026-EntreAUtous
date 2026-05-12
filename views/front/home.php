@@ -122,7 +122,7 @@ $userName   = $isLoggedIn ? $_SESSION['user'] : "";
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                <a class="dropdown-item d-flex align-items-center" href="front.php">
                                     <span class="icon-wrap bg-purple-subtle" style="background:#f3e8ff;color:#7c3aed"><i class="fas fa-envelope"></i></span>
                                     Messagerie
                                     <span class="ms-auto badge bg-secondary int-badge">Module Mohamed </span>
